@@ -3,7 +3,7 @@
 namespace WildWolf;
 
 use WildWolf\ImageUploaderException;
-use WidlWolf\UploadValidator;
+use WildWolf\UploadValidator;
 
 class ImageUploader
 {

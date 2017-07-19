@@ -1,6 +1,8 @@
 <?php
 
-namespace WidlWolf;
+namespace WildWolf;
+
+use WildWolf\ImageUploaderException;
 
 abstract class UploadValidator
 {
