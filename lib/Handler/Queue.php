@@ -4,8 +4,9 @@ namespace WildWolf\Handler;
 
 class Queue extends BaseHandler
 {
-    protected function run($guid)
+    protected function run()
     {
+        $guid     = func_get_arg(0);
         $response = $this->app->fbr->checkUploadStatus($guid);
 
         if (!is_object($response)) {

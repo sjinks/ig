@@ -8,6 +8,9 @@ class UtilsTest extends \PHPUnit\Framework\TestCase
     {
         $result = Utils::safe_fopen(__FILE__, 'x');
         $this->assertFalse($result);
+
+        $result = Utils::safe_fopen(__FILE__, 'r');
+        $this->assertTrue(is_resource($result));
     }
 
     public static function splitFilenameDataProvider()

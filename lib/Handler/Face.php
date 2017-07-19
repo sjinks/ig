@@ -4,8 +4,11 @@ namespace WildWolf\Handler;
 
 class Face extends JsonHandler
 {
-    protected function run($guid, $n)
+    protected function run()
     {
+        $guid     = func_get_arg(0);
+        $n        = func_get_arg(1);
+
         $response = $this->app->fbr->getFaces($guid, $n);
 
         if (!is_object($response) || \FBR\FBR::ANS_GET_FACES != $response->ans_type) {
@@ -46,9 +49,10 @@ class Face extends JsonHandler
             }
 
             $entry  = [$x->par3, $path, $x->foto, $link, $country, $mphoto, $pphoto];
-            $data[] = $entry;
+            $data[$x->par2] = $entry;
         }
 
+        ksort($data);
         $this->response($data);
     }
 }

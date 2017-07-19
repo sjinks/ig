@@ -24,6 +24,7 @@ class Upload extends BaseHandler
         }
         catch (\WildWolf\ImageUploaderException $e) {
             $code = $e->getCode();
+            error_log($e->getMessage());
         }
         finally {
             unlink($_FILES['photo']['tmp_name']);

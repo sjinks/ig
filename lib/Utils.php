@@ -8,7 +8,13 @@ abstract class Utils
     {
         $level = error_reporting();
         error_reporting($level & ~E_WARNING);
-        $retval = fopen($fname, $mode, $use_include_path, $context);
+        if (null === $context) {
+            $retval = fopen($fname, $mode, $use_include_path);
+        }
+        else {
+            $retval = fopen($fname, $mode, $use_include_path, $context);
+        }
+
         error_reporting($level);
         return $retval;
     }
