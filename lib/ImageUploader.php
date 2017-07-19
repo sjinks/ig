@@ -81,7 +81,7 @@ class ImageUploader
         $this->accepted_types = $v;
     }
 
-    public function directoryDepth() : integer
+    public function directoryDepth() : int
     {
         return $this->dir_depth;
     }
