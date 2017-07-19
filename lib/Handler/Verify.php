@@ -41,7 +41,7 @@ class Verify extends BaseHandler
             $this->failure($err, true);
         }
         else {
-            $this->redirect('/start');
+            $this->app->redirect('/start');
         }
     }
 }

@@ -9,7 +9,7 @@ class Upload extends BaseHandler
         $code = 0;
 
         try {
-            list($resource, $type) = $this->uploader->validateFile('photo');
+            list($resource, $type) = $this->app->uploader->validateFile('photo');
 
             $this->trackUpload();
             $response = $this->app->fbr->uploadFile($resource);
@@ -20,7 +20,7 @@ class Upload extends BaseHandler
             $guid = $response->data->reqID_serv;
             $file = $guid . '.jpg';
 
-            $this->uploader->saveAsJpeg($resource, $file);
+            $this->app->uploader->saveAsJpeg($resource, $file);
         }
         catch (\WildWolf\ImageUploaderException $e) {
             $code = $e->getCode();
@@ -33,7 +33,7 @@ class Upload extends BaseHandler
             $this->failure($code);
         }
 
-        $this->redirect('/queue/' . $guid);
+        $this->app->redirect('/queue/' . $guid);
     }
 
     private function trackUpload()

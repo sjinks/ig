@@ -19,7 +19,7 @@ class Index extends BaseHandler
                 unset($_SESSION['user']);
             }
             else {
-                $this->app->redirect(self::maybeAppendErrorCode('/start'));
+                $this->app->redirect($this->maybeAppendErrorCode('/start'));
             }
         }
     }

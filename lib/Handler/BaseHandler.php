@@ -18,7 +18,7 @@ abstract class BaseHandler
     const ERROR_NO_CREDITS         = 10;
 
     /**
-     * @var \Slim\Slim
+     * @var \Application
      */
     protected $app;
 
@@ -37,7 +37,7 @@ abstract class BaseHandler
         $this->code = filter_input(INPUT_GET, 'error', FILTER_SANITIZE_NUMBER_INT);
 
         $args = func_get_args();
-        $this->run(...$args);
+        $this->run(/** @scrutinizer ignore-call */ ...$args);
     }
 
     abstract protected function run();
@@ -60,11 +60,11 @@ abstract class BaseHandler
         return isset($errors[$code]) ? $errors[$code] : 'Невідома помилка';
     }
 
-    protected static function maybeAppendErrorCode(string $url) : string
+    protected function maybeAppendErrorCode(string $url) : string
     {
         if ($this->code) {
             $char = (false === strpos($url, '?')) ? '?' : '&';
-            return $url . $char . 'error=' . $code;
+            return $url . $char . 'error=' . $this->code;
         }
 
         return $url;
