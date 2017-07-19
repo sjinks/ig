@@ -95,4 +95,13 @@ class ImageUploaderTest extends \PHPUnit\Framework\TestCase
         $actual   = str_replace('\\', '/', $uploader->getTargetName($fname, false));
         $this->assertEquals($expected, $actual);
     }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testEmptyUploadDirectory()
+    {
+        $uploader = new ImageUploader();
+        $uploader->getTargetName('something');
+    }
 }

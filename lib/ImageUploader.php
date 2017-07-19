@@ -54,10 +54,6 @@ class ImageUploader
 
     public function setMaxUploadSize(int $v)
     {
-        if ($v <= 0) {
-            throw new \InvalidArgumentException();
-        }
-
         $this->max_upload_size = $v;
     }
 
@@ -162,7 +158,7 @@ class ImageUploader
             return $this->loadWithGD($name, $type);
         }
 
-        return null;
+        throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
     }
 
     public function validateFile(string $key) : array
