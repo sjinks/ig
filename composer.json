@@ -1,0 +1,22 @@
+{
+    "require": {
+        "slim/slim": "~2.0",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "php": ">=7.0",
+        "ext-openssl": "*",
+        "ext-gd": "*",
+        "wildwolf/fbr": "dev-master",
+        "wildwolf/accountkit": "dev-master",
+        "google/recaptcha": "~1.1",
+        "cloudflare/cf-ip-rewrite": "^1.0",
+        "wildwolf/sepapi-client": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "WildWolf\\": "lib/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
