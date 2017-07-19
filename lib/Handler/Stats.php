@@ -17,6 +17,6 @@ class Stats extends JsonHandler
             $data[] = [$x->par2, $x->par3, $x->foto];
         }
 
-        $this->sendJson($data);
+        $this->response($data);
     }
 }

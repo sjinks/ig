@@ -6,7 +6,7 @@ class Queue extends BaseHandler
 {
     protected function run($guid)
     {
-        $response = $this->acc->fbr->checkUploadStatus($guid);
+        $response = $this->app->fbr->checkUploadStatus($guid);
 
         if (!is_object($response)) {
             $this->failure(self::ERROR_GENERAL_FAILURE);
