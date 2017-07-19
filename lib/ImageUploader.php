@@ -22,7 +22,7 @@ class ImageUploader
     /**
      * @var string
      */
-    private $upload_dir;
+    private $upload_dir = '';
 
     /**
      * @var array
@@ -263,7 +263,7 @@ class ImageUploader
 
     private static function validateResourceType($r)
     {
-        if (is_resource($r) && get_resource_type($r) !== 'gd' || is_object($r) && !($r instanceof \Imagick)) {
+        if (is_resource($r) && get_resource_type($r) !== 'gd' || !($r instanceof \Imagick)) {
             throw new \InvalidArgumentException();
         }
     }

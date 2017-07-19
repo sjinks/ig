@@ -5,8 +5,7 @@ require '../lib/CountryRestrictorMiddleware.php';
 require '../lib/CloudflareIPRewriteMiddleware.php';
 
 if (empty($_ENV['SLIM_MODE'])) {
-    $_ENV['SLIM_MODE'] = 'production';
-//     $_ENV['SLIM_MODE'] = 'development';
+    $_ENV['SLIM_MODE'] = 'production'; // or 'development'
 }
 
 $app = new \Application();
