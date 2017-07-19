@@ -2,6 +2,7 @@
 
 namespace WildWolf;
 
+use WildWolf\ImageUploaderException;
 use WidlWolf\UploadValidator;
 
 class ImageUploader
@@ -115,11 +116,11 @@ class ImageUploader
     {
         $type = self::getFileType($file);
         if ('image/' !== substr($type, 0, strlen('image/'))) {
-            throw ImageUploaderException('', self::ERROR_NOT_IMAGE);
+            throw new ImageUploaderException('', self::ERROR_NOT_IMAGE);
         }
 
         if (!in_array($type, $this->accepted_types)) {
-            throw ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
+            throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
         }
 
         return $type;
@@ -131,7 +132,7 @@ class ImageUploader
             return new \Imagick($name);
         }
         catch (\ImagickException $e) {
-            throw ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
+            throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
         }
     }
 
@@ -145,7 +146,7 @@ class ImageUploader
 
         $im = isset($lut[$type]) ? ${$lut[$type]}($name) : null;
         if (!is_resource($im)) {
-            throw ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
+            throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
         }
 
         return $im;
