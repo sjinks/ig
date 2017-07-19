@@ -215,8 +215,7 @@ final class Application extends \Slim\Slim
 
     public function action_verify()
     {
-        $status = filter_input(INPUT_GET, 'status', FILTER_DEFAULT);
-        $code   = filter_input(INPUT_GET, 'code',   FILTER_DEFAULT);
+        $code = filter_input(INPUT_GET, 'code',   FILTER_DEFAULT);
 
         if ($code) {
             try {
@@ -225,7 +224,7 @@ final class Application extends \Slim\Slim
 
                 $response = $this->sepapi->smsLogin($d2->id, $d1->access_token, $d2->phone->number);
                 if (is_numeric($response)) {
-                    $kit->logout($d1->access_token);
+                    $this->acckit->logout($d1->access_token);
                     switch ($response) {
                         case 403: $this->failure(self::ERROR_BANNED, true);
                         case 509: $this->failure(self::ERROR_NO_CREDITS, true);
