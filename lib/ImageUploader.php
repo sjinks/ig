@@ -2,13 +2,15 @@
 
 namespace WildWolf;
 
+use WidlWolf\UploadValidator;
+
 class ImageUploader
 {
-    const ERROR_UPLOAD_FAILURE     = 1;
-    const ERROR_FILE_EMPTY         = 2;
+    const ERROR_UPLOAD_FAILURE     = UploadValidator::ERROR_UPLOAD_FAILURE;
+    const ERROR_FILE_TOO_SMALL     = UploadValidator::ERROR_FILE_TOO_SMALL;
     const ERROR_NOT_IMAGE          = 3;
     const ERROR_FILE_NOT_SUPPORTED = 4;
-    const ERROR_FILE_TOO_BIG       = 5;
+    const ERROR_FILE_TOO_BIG       = UploadValidator::ERROR_FILE_TOO_BIG;
     const ERROR_GENERAL_FAILURE    = 6;
 
     /**
@@ -102,21 +104,6 @@ class ImageUploader
         $this->check_uniquness = $v;
     }
 
-    private function basicSanityChecks(string $key)
-    {
-        if (empty($_FILES[$key]) || UPLOAD_ERR_OK !== $_FILES[$key]['error']) {
-            throw ImageUploaderException('', self::ERROR_UPLOAD_FAILURE);
-        }
-
-        if (empty($_FILES[$key]['size'])) {
-            throw ImageUploaderException('', self::ERROR_FILE_EMPTY);
-        }
-
-        if ($_FILES[$key]['size'] > $this->max_upload_size) {
-            throw ImageUploaderException('', self::ERROR_FILE_TOO_BIG);
-        }
-    }
-
     private static function getFileType(string $file) : string
     {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -126,10 +113,6 @@ class ImageUploader
 
     private function validateImageType(string $file) : string
     {
-        if (!is_uploaded_file($file)) {
-            throw ImageUploaderException('', self::ERROR_GENERAL_FAILURE);
-        }
-
         $type = self::getFileType($file);
         if ('image/' !== substr($type, 0, strlen('image/'))) {
             throw ImageUploaderException('', self::ERROR_NOT_IMAGE);
@@ -154,21 +137,13 @@ class ImageUploader
 
     private function loadWithGD(string $name, string $type)
     {
-        $im = null;
-        switch ($type) {
-            case 'image/jpeg':
-                $im = imagecreatefromjpeg($name);
-                break;
+        static $lut = [
+            'image/jpeg' => 'imagecreatefromjpeg',
+            'image/png'  => 'imagecreatefrompng',
+            'image/gif'  => 'imagecreatefromgif',
+        ];
 
-            case 'image/png':
-                $im = imagecreatefrompng($name);
-                break;
-
-            case 'image/gif':
-                $im = imagecreatefromgif($name);
-                break;
-        }
-
+        $im = isset($lut[$type]) ? ${$lut[$type]}($name) : null;
         if (!is_resource($im)) {
             throw ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
         }
@@ -191,7 +166,8 @@ class ImageUploader
 
     public function validateFile(string $key) : array
     {
-        $this->basicSanityChecks($key);
+        UploadValidator::isUploadedFile($key);
+        UploadValidator::isValidSize($key, 0, $this->max_upload_size);
 
         $fname = $_FILES[$key]['tmp_name'];
         $type  = $this->validateImageType($fname);
@@ -201,6 +177,10 @@ class ImageUploader
 
     private function getTargetDirectory(string $name) : string
     {
+        if (empty($this->upload_dir)) {
+            throw new \RuntimeException("Upload directory is not set");
+        }
+
         $parts = [$this->upload_dir];
         for ($i=0; $i<$this->dir_depth; ++$i) {
             $part = substr($name, 2*$i, 2);
@@ -232,6 +212,21 @@ class ImageUploader
         return [$f, $fullname];
     }
 
+    private static function splitFilename(string $filename) : array
+    {
+        $pos = strrpos($filename, '.');
+        if (false === $pos) {
+            $name = $filename;
+            $ext  = '';
+        }
+        else {
+            $name = substr($filename, 0, $pos);
+            $ext  = substr($filename, $pos);
+        }
+
+        return [$name, $ext];
+    }
+
     private function createTargetFile(string $dir, string $file)
     {
         $fullname = $dir . DIRECTORY_SEPARATOR . $file;
@@ -239,15 +234,7 @@ class ImageUploader
             return $this->createFileForcefully($fullname);
         }
 
-        $pos = strrpos($file, '.');
-        if (false === $pos) {
-            $name = $file;
-            $ext  = '';
-        }
-        else {
-            $name = substr($file, 0, $pos);
-            $ext  = substr($file, $pos);
-        }
+        list($name, $ext) = self::splitFilename($file);
 
         $suffix = 0;
 
@@ -273,15 +260,16 @@ class ImageUploader
         $im->writeImageFile($f);
     }
 
-    public function saveAsJpeg($r, string $name) : string
+    private static function validateResourceType($r)
     {
         if (is_resource($r) && get_resource_type($r) !== 'gd' || is_object($r) && !($r instanceof \Imagick)) {
             throw new \InvalidArgumentException();
         }
+    }
 
-        if (empty($this->upload_dir)) {
-            throw new \RuntimeException("Upload directory is not set");
-        }
+    public function saveAsJpeg($r, string $name) : string
+    {
+        self::validateResourceType($r);
 
         $name = basename($name);
         $dir  = $this->getTargetDirectory($name);
