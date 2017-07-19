@@ -29,7 +29,7 @@ abstract class UploadValidator
             throw new ImageUploaderException('', self::ERROR_FILE_TOO_SMALL);
         }
 
-        if ($size > $max) {
+        if ($max && $size > $max) {
             throw new ImageUploaderException('', self::ERROR_FILE_TOO_BIG);
         }
     }
