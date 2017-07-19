@@ -66,4 +66,33 @@ class ImageUploaderTest extends \PHPUnit\Framework\TestCase
         $uploader = new ImageUploader();
         $uploader->setDirectoryDepth(-1);
     }
+
+    public static function targetNameDataProvider()
+    {
+        return [
+            [0, 'file', 'file'],
+            [1, 'file', 'fi/file'],
+            [2, 'file', 'fi/le/file'],
+            [3, 'file', 'fi/le/file'],
+            [3, '026307f6-1487-4141-830e-20d436a8ca2d.jpg', '02/63/07/026307f6-1487-4141-830e-20d436a8ca2d.jpg']
+        ];
+    }
+
+    /**
+     * @dataProvider targetNameDataProvider
+     */
+    public function testTargetName($depth, $fname, $res)
+    {
+        $uploader = new ImageUploader();
+        $uploader->setUploadDir(__DIR__);
+        $uploader->setDirectoryDepth($depth);
+
+        $expected = $res;
+        $actual   = str_replace('\\', '/', $uploader->getTargetName($fname, true));
+        $this->assertEquals($expected, $actual);
+
+        $expected = str_replace('\\', '/', __DIR__ . '/' . $res);
+        $actual   = str_replace('\\', '/', $uploader->getTargetName($fname, false));
+        $this->assertEquals($expected, $actual);
+    }
 }

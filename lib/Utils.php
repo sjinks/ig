@@ -12,4 +12,19 @@ abstract class Utils
         error_reporting($level);
         return $retval;
     }
+
+    public static function splitFilename(string $filename) : array
+    {
+        $pos = strrpos($filename, '.');
+        if (false === $pos) {
+            $name = $filename;
+            $ext  = '';
+        }
+        else {
+            $name = substr($filename, 0, $pos);
+            $ext  = substr($filename, $pos);
+        }
+
+        return [$name, $ext];
+    }
 }

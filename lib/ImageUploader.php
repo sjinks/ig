@@ -213,21 +213,6 @@ class ImageUploader
         return [$f, $fullname];
     }
 
-    private static function splitFilename(string $filename) : array
-    {
-        $pos = strrpos($filename, '.');
-        if (false === $pos) {
-            $name = $filename;
-            $ext  = '';
-        }
-        else {
-            $name = substr($filename, 0, $pos);
-            $ext  = substr($filename, $pos);
-        }
-
-        return [$name, $ext];
-    }
-
     private function createTargetFile(string $dir, string $file)
     {
         $fullname = $dir . DIRECTORY_SEPARATOR . $file;
@@ -235,7 +220,7 @@ class ImageUploader
             return $this->createFileForcefully($fullname);
         }
 
-        list($name, $ext) = self::splitFilename($file);
+        list($name, $ext) = Utils::splitFilename($file);
 
         $suffix = 0;
 
