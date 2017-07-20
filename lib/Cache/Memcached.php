@@ -238,11 +238,7 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
         Validator::validateKey($key);
         $res = $this->mc->get($key);
 
-        if (false === $res) {
-            return (\Memcached::RES_SUCCESS == $this->mc->getResultCode());
-        }
-
-        return true;
+        return (false !== $res) ? true : (\Memcached::RES_SUCCESS == $this->mc->getResultCode());
     }
 
     private static function relativeTtl($ttl)
