@@ -28,6 +28,7 @@ class Face extends JsonHandler
 
     private function getAdditionalInformation($path) : array
     {
+        $orig    = $path;
         $link    = '#';
         $country = '';
         $mphoto  = '';
@@ -43,7 +44,7 @@ class Face extends JsonHandler
                 $country = $json ? $json[4] : '';
 
                 $prefix = 'criminals' . str_replace('\\', '/', $m[1]);
-                if ($json[9] && preg_match('/{([^}]++)}/', $x->path, $m)) {
+                if ($json[9] && preg_match('/{([^}]++)}/', $orig, $m)) {
                     $prefix .= $m[1] . '.';
                     foreach ($json[9] as $y) {
                         if (!$pphoto && 'image/' === substr($y[1], 0, strlen('image/'))) {
