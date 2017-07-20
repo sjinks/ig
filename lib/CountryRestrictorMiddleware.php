@@ -28,7 +28,7 @@ class CountryRestrictorMiddleware extends \Slim\Middleware
         $cc  = $env['country_code'];
 
         if (empty($cc) && function_exists('geoip_record_by_name')) {
-            $rec = (array)geoip_record_by_name($addr);
+            $rec = (array)geoip_record_by_name($app->request->getIp());
             $cc  = isset($rec['country_code']) ? $rec['country_code'] : null;
         }
 
