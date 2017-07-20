@@ -181,24 +181,14 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
         Validator::validateIterable($values);
         Validator::validateTtl($ttl);
 
-        $ttl  = self::relativeTtl($ttl);
-        $vals = [];
-
-        foreach ($values as $key => $value) {
-            if (!is_int($key)) {
-                Validator::validateKey($key);
-            }
-
-            $vals[$key] = $value;
-        }
-
-        $values = $vals;
+        $ttl    = self::relativeTtl($ttl);
+        $values = self::iterableToArray($values);
 
         if ($ttl !== null && $ttl <= 0) {
             return $this->deleteMultiple(array_keys($values));
         }
 
-        return $this->mc->setMulti($vals, $ttl);
+        return $this->mc->setMulti($values, $ttl);
     }
 
     /**
@@ -269,5 +259,19 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
     private function okIfNotFound($res) : bool
     {
         return false !== $res ? true : $this->mc->getResultCode() == \Memcached::RES_NOTFOUND;
+    }
+
+    private static function iterableToArray($values) : array
+    {
+        $retval = [];
+        foreach ($values as $key => $value) {
+            if (!is_int($key)) {
+                Validator::validateKey($key);
+            }
+
+            $retval[$key] = $value;
+        }
+
+        return $retval;
     }
 }
