@@ -3,7 +3,7 @@
 use WildWolf\Handler\Index;
 
 /**
- * @property \FBR\FBR $fbr
+ * @property \WildWolf\FBR\Client $fbr
  * @property \WildWolf\SepAPI $sepapi
  * @property \WildWolf\AccountKit $acckit
  * @property \WildWolf\ImageUploader $uploader
@@ -69,7 +69,7 @@ final class Application extends \Slim\Slim
         });
 
         $this->container->singleton('fbr', function() use ($app) {
-            $fbr = new \FBR\FBR($app->config('fbr.url'), $app->config('fbr.client_id'));
+            $fbr = new \WildWolf\FBR\Client($app->config('fbr.url'), $app->config('fbr.client_id'));
             $fbr->setCache(new \WildWolf\Psr6CacheAdapter($app->cache));
             return $fbr;
         });

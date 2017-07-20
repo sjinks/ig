@@ -2,6 +2,9 @@
 
 namespace WildWolf\Handler;
 
+use WildWolf\FBR\Response\InProgress;
+use WildWolf\FBR\Response\ResultReady;
+
 class Queue extends BaseHandler
 {
     protected function run()
@@ -9,13 +12,10 @@ class Queue extends BaseHandler
         $guid     = func_get_arg(0);
         $response = $this->app->fbr->checkUploadStatus($guid);
 
-        if (!is_object($response)) {
-            $this->failure(self::ERROR_GENERAL_FAILURE);
-        }
-        elseif (\FBR\FBR::ANS_PROCESSING == $response->ans_type) {
+        if ($response instanceof InProgress) {
             $this->app->render('wait.phtml');
         }
-        elseif (\FBR\FBR::ANS_COMPLETED == $response->ans_type) {
+        elseif ($response instanceof ResultReady) {
             $this->app->redirect('/result/' . $guid);
         }
         else {

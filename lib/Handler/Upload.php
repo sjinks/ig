@@ -2,6 +2,8 @@
 
 namespace WildWolf\Handler;
 
+use WildWolf\FBR\Response\UploadAck;
+
 class Upload extends BaseHandler
 {
     protected function run()
@@ -13,11 +15,11 @@ class Upload extends BaseHandler
 
             $this->trackUpload();
             $response = $this->app->fbr->uploadFile($resource);
-            if (!is_object($response) || $response->ans_type != \FBR\FBR::ANS_OK) {
+            if (!($response instanceof UploadAck)) {
                 $this->failure(self::ERROR_GENERAL_FAILURE);
             }
 
-            $guid = $response->data->reqID_serv;
+            $guid = $response->serverRequestId();
             $file = $guid . '.jpg';
 
             $this->app->uploader->saveAsJpeg($resource, $file);

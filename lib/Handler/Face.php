@@ -9,21 +9,27 @@ class Face extends JsonHandler
         $guid     = func_get_arg(0);
         $n        = func_get_arg(1);
 
-        $response = $this->app->fbr->getFaces($guid, $n);
 
-        if (!is_object($response) || \FBR\FBR::ANS_GET_FACES != $response->ans_type) {
+
+        try {
+            $response = $this->app->fbr->getFaces($guid, $n);
+
+            if (!($response instanceof \WildWolf\FBR\Response\Match)) {
+                $this->error();
+            }
+
+            $data = [];
+            foreach ($response as $x) {
+                $info   = $this->getAdditionalInformation($x->path());
+                $entry  = [$x->similarity(), $info[0], $x->face(), $info[1], $info[2], $info[3], $info[4]];
+                $data[] = $entry;
+            }
+
+            $this->response($data);
+        }
+        catch (\WildWolf\FBR\Exception $e) {
             $this->error();
         }
-
-        $data = [];
-        foreach ($response->data->fotos as $x) {
-            $info   = $this->getAdditionalInformation($x->path);
-            $entry  = [$x->par3, $info[0], $x->foto, $info[1], $info[2], $info[3], $info[4]];
-            $data[$x->par2] = $entry;
-        }
-
-        ksort($data);
-        $this->response($data);
     }
 
     private function getAdditionalInformation($path) : array
