@@ -17,7 +17,7 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
         $options = isset($config['options']) ? $config['options'] : null;
 
         is_array($servers) && $this->addServers($servers);
-        is_array($options) && $this->setOptions($oiptions);
+        is_array($options) && $this->setOptions($options);
         !is_null($prefix) && !isset($options[\Memcached::OPT_PREFIX_KEY]) && $this->setOption(\Memcached::OPT_PREFIX_KEY, $prefix);
     }
 
@@ -51,7 +51,7 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
         return $this->mc->setOption($option, $value);
     }
 
-    public function setOptions(array $oiptions) : bool
+    public function setOptions(array $options) : bool
     {
         return $this->mc->setOptions($options);
     }
