@@ -37,7 +37,7 @@ abstract class BaseHandler
         $this->code = filter_input(INPUT_GET, 'error', FILTER_SANITIZE_NUMBER_INT);
 
         $args = func_get_args();
-        $this->run(/** @scrutinizer ignore-call */ ...$args);
+        /** @scrutinizer ignore-call */$this->run(...$args);
     }
 
     abstract protected function run();

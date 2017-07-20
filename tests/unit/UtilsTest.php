@@ -1,6 +1,8 @@
 <?php
 
-namespace WildWolf;
+namespace WildWolf\Test;
+
+use WildWolf\Utils;
 
 class UtilsTest extends \PHPUnit\Framework\TestCase
 {

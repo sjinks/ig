@@ -7,6 +7,8 @@ use WildWolf\Handler\Index;
  * @property \WildWolf\SepAPI $sepapi
  * @property \WildWolf\AccountKit $acckit
  * @property \WildWolf\ImageUploader $uploader
+ * @property \WildWolf\Cache\Memcached $cache
+ * @property \ReCaptcha\ReCaptcha $recaptcha
  */
 final class Application extends \Slim\Slim
 {
@@ -48,6 +50,16 @@ final class Application extends \Slim\Slim
     {
         $app = $this;
 
+        $app->container->singleton('cache', function() {
+            return new \WildWolf\Cache\Memcached([
+                'prefix'  => 'separator.',
+                'servers' => [['127.0.0.1', 11211, 1]],
+                'options' => [
+                    \Memcached::OPT_BINARY_PROTOCOL => true,
+                ]
+            ]);
+        });
+
         $this->container->singleton('sepapi', function() use ($app) {
             return new \WildWolf\SepAPI($app->config('api.endpoint'), $app->config('api.token'));
         });
@@ -57,7 +69,9 @@ final class Application extends \Slim\Slim
         });
 
         $this->container->singleton('fbr', function() use ($app) {
-            return new \FBR\FBR($app->config('fbr.url'), $app->config('fbr.client_id'));
+            $fbr = new \FBR\FBR($app->config('fbr.url'), $app->config('fbr.client_id'));
+            $fbr->setCache(new \WildWolf\Psr6CacheAdapter($app->cache));
+            return $fbr;
         });
 
         $this->container->singleton('uploader', function() {
@@ -68,6 +82,10 @@ final class Application extends \Slim\Slim
             $uploader->setAcceptedTypes(['image/jpeg', 'image/png']);
             $uploader->setUploadDir(realpath(__DIR__ . '/../public/uploads'));
             return $uploader;
+        });
+
+        $this->container->singleton('recaptcha', function() use ($app) {
+            return new \ReCaptcha\ReCaptcha($app->config('recaptcha.secret'));
         });
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace WildWolf;
+namespace WildWolf\Test;
+
+use WildWolf\Cache\Memcached;
 
 /**
  * @requires extension memcached
@@ -22,6 +24,6 @@ class MemcachedCacheTest extends \Cache\IntegrationTests\SimpleCacheTest
             'servers' => [['127.0.0.1', 11211, 1]],
         ];
 
-        return new Cache\Memcached($config);
+        return new Memcached($config);
     }
 }

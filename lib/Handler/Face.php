@@ -38,7 +38,7 @@ class Face extends JsonHandler
             $m = array();
             if (preg_match('!([/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2,}[/\\\\])!', $path, $m)) {
                 $id      = str_replace(['/', '\\'], '', $m[1]);
-                $json    = json_decode(file_get_contents('https://srv1.psbapi.work/c/D/' . hexdec($id)));
+                $json    = $this->psbInfo(hexdec($id));
                 $path    = $json ? $json[2] : $path;
                 $link    = $json ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : ('https://myrotvorets.center/?p=0x' .  $id);
                 $country = $json ? $json[4] : '';
@@ -61,5 +61,18 @@ class Face extends JsonHandler
         }
 
         return [$path, $link, $country, $mphoto, $pphoto];
+    }
+
+    private function psbInfo(int $id)
+    {
+        $key = 'criminal-' . $id;
+        $res = $this->app->cache->get($key, null);
+
+        if (!is_array($res)) {
+            $res = json_decode(file_get_contents('https://srv1.psbapi.work/c/D/' . $id));
+            $this->app->cache->set($key, $res, 3600);
+        }
+
+        return $res;
     }
 }

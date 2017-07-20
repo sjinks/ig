@@ -12,7 +12,8 @@
         "cloudflare/cf-ip-rewrite": "^1.0",
         "wildwolf/sepapi-client": "dev-master",
         "psr/simple-cache": "^1.0",
-        "wildwolf/psr-cache-common": "^1.0"
+        "wildwolf/psr-cache-common": "^1.0",
+        "wildwolf/psr-cache-adapters": "dev-master"
     },
     "autoload": {
         "psr-4": {

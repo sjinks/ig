@@ -10,7 +10,7 @@ class ValidateReCaptcha extends BaseHandler
             return;
         }
 
-        $recaptcha = new \ReCaptcha\ReCaptcha($this->app->config('recaptcha.secret'));
+        $recaptcha = $this->app->recaptcha;
         $response  = filter_input(INPUT_POST, 'g-recaptcha-response', FILTER_DEFAULT);
         $ip        = filter_input(INPUT_SERVER, 'REMOTE_ADDR', FILTER_DEFAULT);
         $result    = $recaptcha->verify($response, $ip);

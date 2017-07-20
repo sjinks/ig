@@ -1,6 +1,8 @@
 <?php
 
-namespace WildWolf;
+namespace WildWolf\Test;
+
+use WildWolf\ImageUploader;
 
 class ImageUploaderTest extends \PHPUnit\Framework\TestCase
 {
