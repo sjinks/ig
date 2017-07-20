@@ -101,16 +101,10 @@ class ImageUploader
         $this->check_uniquness = $v;
     }
 
-    private static function getFileType(string $file) : string
-    {
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $type  = $finfo->file($file, FILEINFO_MIME_TYPE);
-        return $type ? $type : 'application/octet-stream';
-    }
-
     private function validateImageType(string $file) : string
     {
-        $type = self::getFileType($file);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $type  = (string)$finfo->file($file, FILEINFO_MIME_TYPE);
         if ('image/' !== substr($type, 0, strlen('image/'))) {
             throw new ImageUploaderException('', self::ERROR_NOT_IMAGE);
         }
