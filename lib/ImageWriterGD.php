@@ -4,7 +4,7 @@ namespace WildWolf;
 
 class ImageWriterGD extends ImageWriter implements ImageWriterInterafce
 {
-    public function save($f)
+    private function getSaveFunction() : string
     {
         static $lut = [
             'jpeg' => 'imagejpeg',
@@ -15,7 +15,17 @@ class ImageWriterGD extends ImageWriter implements ImageWriterInterafce
         $fmt  = strtolower($this->fmt);
         $func = isset($lut[$fmt]) ? $lut[$fmt] : null;
 
-        if (!$func || !$func($this->im, $f)) {
+        if (!$func) {
+            throw new ImageUploaderException('', ImageUploader::ERROR_GENERAL_FAILURE);
+        }
+
+        return $func;
+    }
+
+    public function save($f)
+    {
+        $func = $this->getSaveFunction();
+        if (!$func($this->im, $f)) {
             throw new ImageUploaderException('', ImageUploader::ERROR_GENERAL_FAILURE);
         }
     }
@@ -38,21 +48,9 @@ class ImageWriterGD extends ImageWriter implements ImageWriterInterafce
 
     public function toString() : string
     {
-        static $lut = [
-            'jpeg' => 'imagejpeg',
-            'png'  => 'imagepng',
-            'gif'  => 'imagegif',
-        ];
-
-        $fmt  = strtolower($this->fmt);
-        $func = isset($lut[$fmt]) ? $lut[$fmt] : null;
-
-        if ($func) {
-            ob_start();
-            $func($this->im);
-            return ob_get_clean();
-        }
-
-        return '';
+        $func = $this->getSaveFunction();
+        ob_start();
+        $func($this->im);
+        return ob_get_clean();
     }
 }

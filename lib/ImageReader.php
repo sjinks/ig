@@ -23,7 +23,7 @@ abstract class ImageReader implements ImageReaderInterface
             return new ImageReaderGD($fname, $type);
         }
 
-        throw new ImageUploaderException('', ImageLoader::ERROR_FILE_NOT_SUPPORTED);
+        throw new ImageUploaderException('', ImageUploader::ERROR_FILE_NOT_SUPPORTED);
     }
 
     public function megapixels() : float

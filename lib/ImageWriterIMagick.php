@@ -19,13 +19,9 @@ class ImageWriterIMagick extends ImageWriter implements ImageWriterInterafce
 
     public function resize(float $factor)
     {
-        $w = $this->im->getImageWidth();
-        $h = $this->im->getImageHeight();
-
+        $w     = $this->im->getImageWidth();
         $new_w = floor($w * $factor);
-        $new_h = floor($h * $factor);
-
-        $res   = $this->im->resizeImage($new_w, 0, \IMagick::FILTER_LANCZOS, 1);
+        $res   = $this->im->resizeImage((int)$new_w, 0, \IMagick::FILTER_LANCZOS, 1);
         if (false === $res) {
             throw new ImageUploaderException('', ImageUploader::ERROR_GENERAL_FAILURE);
         }
