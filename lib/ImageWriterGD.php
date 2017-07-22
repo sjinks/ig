@@ -13,7 +13,7 @@ class ImageWriterGD extends ImageWriter implements ImageWriterInterface
         ];
 
         $fmt  = strtolower($this->fmt);
-        $func = isset($lut[$fmt]) ? $lut[$fmt] : null;
+        $func = $lut[$fmt] ?? null;
 
         if (!$func) {
             throw new ImageUploaderException('', ImageUploader::ERROR_GENERAL_FAILURE);

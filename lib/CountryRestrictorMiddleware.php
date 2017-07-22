@@ -29,7 +29,7 @@ class CountryRestrictorMiddleware extends \Slim\Middleware
 
         if (empty($cc) && function_exists('geoip_record_by_name')) {
             $rec = (array)geoip_record_by_name($app->request->getIp());
-            $cc  = isset($rec['country_code']) ? $rec['country_code'] : null;
+            $cc  = $rec['country_code'] ?? null;
         }
 
         return $cc;

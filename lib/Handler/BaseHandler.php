@@ -57,7 +57,7 @@ abstract class BaseHandler
             self::ERROR_NO_CREDITS         => 'Кількість безкоштовних спроб досягнуто. Будь ласка, спробуйте ще раз завтра.'
         ];
 
-        return isset($errors[$code]) ? $errors[$code] : 'Невідома помилка';
+        return $errors[$code] ?? 'Невідома помилка';
     }
 
     protected function maybeAppendErrorCode(string $url) : string
