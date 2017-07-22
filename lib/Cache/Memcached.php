@@ -12,9 +12,9 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
     public function __construct(array $config = [])
     {
         $this->mc = new \Memcached();
-        $prefix  = isset($config['prefix'])  ? $config['prefix']  : null;
-        $servers = isset($config['servers']) ? $config['servers'] : null;
-        $options = isset($config['options']) ? $config['options'] : null;
+        $prefix   = $config['prefix']  ?? null;
+        $servers  = $config['servers'] ?? null;
+        $options  = $config['options'] ?? null;
 
         is_array($servers) && $this->addServers($servers);
         is_array($options) && $this->setOptions($options);
@@ -156,7 +156,7 @@ class Memcached implements \Psr\SimpleCache\CacheInterface
         }
 
         foreach ($keys as $key) {
-            $retval[$key] = isset($result[$key]) ? $result[$key] : $default;
+            $retval[$key] = array_key_exists($key, $result) ? $result[$key] : $default;
         }
 
         return $retval;
