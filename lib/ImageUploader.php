@@ -43,11 +43,6 @@ class ImageUploader
      */
     private $check_uniquness = true;
 
-    /**
-     * @var float
-     */
-    private $max_megapixels;
-
     public function __construct()
     {
     }
@@ -106,16 +101,6 @@ class ImageUploader
         $this->check_uniquness = $v;
     }
 
-    public function maxMegaPixels() : float
-    {
-        return $this->max_megapixels;
-    }
-
-    public function setMaxMegaPixels(float $v)
-    {
-        $this->max_megapixels = $v;
-    }
-
     private function validateImageType(string $file) : string
     {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -139,6 +124,7 @@ class ImageUploader
         $fname = $_FILES[$key]['tmp_name'];
         $type  = $this->validateImageType($fname);
         $res   = ImageReader::getReader($fname, $type);
+        $res->load();
         return [$res, $type];
     }
 

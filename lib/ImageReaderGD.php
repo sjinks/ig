@@ -32,7 +32,7 @@ class ImageReaderGD extends ImageReader implements ImageReaderInterface
         return imagesy($this->im);
     }
 
-    public function getWriter() : ImageWriterInterafce
+    public function getWriter() : ImageWriterInterface
     {
         return new ImageWriterGD($this->im);
     }

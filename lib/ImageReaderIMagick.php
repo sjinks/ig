@@ -26,7 +26,7 @@ class ImageReaderIMagick extends ImageReader implements ImageReaderInterface
         return $this->im->getImageHeight();
     }
 
-    public function getWriter() : ImageWriterInterafce
+    public function getWriter() : ImageWriterInterface
     {
         return new ImageWriterIMagick($this->im);
     }

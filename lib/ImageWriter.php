@@ -2,10 +2,10 @@
 
 namespace WildWolf;
 
-class ImageWriter implements ImageWriterInterafce
+abstract class ImageWriter implements ImageWriterInterface
 {
     protected $im;
-    protected $fmt;
+    protected $fmt = 'JPEG';
 
     public function __construct($image)
     {

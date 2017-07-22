@@ -2,7 +2,7 @@
 
 namespace WildWolf;
 
-interface ImageWriterInterafce
+interface ImageWriterInterface
 {
     public function setOutputFormat(string $format);
     public function save($f);

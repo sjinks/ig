@@ -2,7 +2,7 @@
 
 namespace WildWolf;
 
-class ImageWriterGD extends ImageWriter implements ImageWriterInterafce
+class ImageWriterGD extends ImageWriter implements ImageWriterInterface
 {
     private function getSaveFunction() : string
     {

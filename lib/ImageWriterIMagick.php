@@ -6,7 +6,7 @@ namespace WildWolf;
  * @property \IMagick $im
  *
  */
-class ImageWriterIMagick extends ImageWriter implements ImageWriterInterafce
+class ImageWriterIMagick extends ImageWriter implements ImageWriterInterface
 {
     public function save($f)
     {

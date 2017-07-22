@@ -24,7 +24,7 @@ class CheckPhone extends JsonHandler
             }
         }
         catch (\Exception $e) {
-            // Do nothing
+            error_log($e);
         }
 
         $this->response($body);

@@ -7,5 +7,5 @@ interface ImageReaderInterface
     public function width() : int;
     public function height() : int;
     public function load();
-    public function getWriter() : ImageWriterInterafce;
+    public function getWriter() : ImageWriterInterface;
 }

@@ -3,6 +3,7 @@
 namespace WildWolf\Handler;
 
 use WildWolf\FBR\Response\UploadAck;
+use WildWolf\ImageReader;
 
 class Upload extends BaseHandler
 {
@@ -11,10 +12,20 @@ class Upload extends BaseHandler
         $code = 0;
 
         try {
+            /**
+             * @var ImageReader $resource
+             */
             list($resource, $type) = $this->app->uploader->validateFile('photo');
+            $writer = $resource->getWriter();
+            $mp     = $resource->megapixels();
+
+            if ($mp > 5) {
+                $factor = 1/sqrt($mp/5);
+                $writer->resize($factor);
+            }
 
             $this->trackUpload();
-            $response = $this->app->fbr->uploadFile($resource);
+            $response = $this->app->fbr->uploadFile($writer->toString());
             if (!($response instanceof UploadAck)) {
                 $this->failure(self::ERROR_GENERAL_FAILURE);
             }
