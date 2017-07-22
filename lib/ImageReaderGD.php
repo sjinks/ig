@@ -14,7 +14,7 @@ class ImageReaderGD extends ImageReader implements ImageReaderInterface
             'image/gif'  => 'imagecreatefromgif',
         ];
 
-        $im = isset($lut[$this->type]) ? ${$lut[$this->type]}($name) : null;
+        $im = isset($lut[$this->type]) ? ${$lut[$this->type]}($this->file) : null;
         if (!is_resource($im)) {
             throw new ImageUploaderException('', ImageUploader::ERROR_FILE_NOT_SUPPORTED);
         }
