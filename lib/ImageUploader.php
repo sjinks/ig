@@ -17,7 +17,7 @@ class ImageUploader
     /**
      * @var integer
      */
-    private $max_upload_size = 5242880;
+    private $max_upload_size = 7340032;
 
     /**
      * @var string
@@ -42,6 +42,11 @@ class ImageUploader
      * @var bool
      */
     private $check_uniquness = true;
+
+    /**
+     * @var float
+     */
+    private $max_megapixels;
 
     public function __construct()
     {
@@ -101,6 +106,16 @@ class ImageUploader
         $this->check_uniquness = $v;
     }
 
+    public function maxMegaPixels() : float
+    {
+        return $this->max_megapixels;
+    }
+
+    public function setMaxMegaPixels(float $v)
+    {
+        $this->max_megapixels = $v;
+    }
+
     private function validateImageType(string $file) : string
     {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -116,45 +131,6 @@ class ImageUploader
         return $type;
     }
 
-    private function loadWithIMagick(string $name) : \IMagick
-    {
-        try {
-            return new \Imagick($name);
-        }
-        catch (\ImagickException $e) {
-            throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
-        }
-    }
-
-    private function loadWithGD(string $name, string $type)
-    {
-        static $lut = [
-            'image/jpeg' => 'imagecreatefromjpeg',
-            'image/png'  => 'imagecreatefrompng',
-            'image/gif'  => 'imagecreatefromgif',
-        ];
-
-        $im = isset($lut[$type]) ? ${$lut[$type]}($name) : null;
-        if (!is_resource($im)) {
-            throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
-        }
-
-        return $im;
-    }
-
-    private function tryLoadFile(string $name, string $type)
-    {
-        if (class_exists('imagick')) {
-            return $this->loadWithIMagick($name);
-        }
-
-        if (extension_loaded('gd')) {
-            return $this->loadWithGD($name, $type);
-        }
-
-        throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
-    }
-
     public function validateFile(string $key) : array
     {
         UploadValidator::isUploadedFile($key);
@@ -162,7 +138,7 @@ class ImageUploader
 
         $fname = $_FILES[$key]['tmp_name'];
         $type  = $this->validateImageType($fname);
-        $res   = $this->tryLoadFile($fname, $type);
+        $res   = ImageReader::getReader($fname, $type);
         return [$res, $type];
     }
 
@@ -225,27 +201,10 @@ class ImageUploader
         return [$f, $fullname];
     }
 
-    private static function saveJpegWithGD($im, $f)
+    public function saveAsJpeg(ImageReaderInterface $r, string $name) : string
     {
-        imagejpeg($im, $f);
-    }
-
-    private static function saveJpegWithIMagick(\IMagick $im, $f)
-    {
-        $im->setImageFormat('JPEG');
-        $im->writeImageFile($f);
-    }
-
-    private static function validateResourceType($r)
-    {
-        if (is_resource($r) && get_resource_type($r) !== 'gd' || !($r instanceof \Imagick)) {
-            throw new \InvalidArgumentException();
-        }
-    }
-
-    public function saveAsJpeg($r, string $name) : string
-    {
-        self::validateResourceType($r);
+        $writer = $r->getWriter();
+        $writer->setOutputFormat('JPEG');
 
         $name = basename($name);
         $dir  = $this->getTargetDirectory($name);
@@ -253,14 +212,11 @@ class ImageUploader
         $this->ensureDirectoryExists($dir);
         $res  = $this->createTargetFile($dir, $name);
 
-        if (is_resource($r)) {
-            self::saveJpegWithGD($r, $res[0]);
+        try {
+            $writer->save($res[0]);
         }
-        elseif ($r instanceof \Imagick) {
-            self::saveJpegWithIMagick($r, $res[0]);
-        }
-        else {
-            throw new ImageUploaderException('', self::ERROR_UPLOAD_FAILURE);
+        catch (ImageUploaderException $e) {
+            throw new ImageUploaderException($e->getMessage(), self::ERROR_UPLOAD_FAILURE);
         }
 
         return $res[1];

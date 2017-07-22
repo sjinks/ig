@@ -76,7 +76,7 @@ final class Application extends \Slim\Slim
 
         $this->container->singleton('uploader', function() {
             $uploader = new \WildWolf\ImageUploader();
-            $uploader->setMaxUploadSize(5242880);
+            $uploader->setMaxUploadSize(7340032);
             $uploader->setDirectoryDepth(3);
             $uploader->setCheckUniqueness(false);
             $uploader->setAcceptedTypes(['image/jpeg', 'image/png']);
