@@ -8,10 +8,7 @@ class Error extends BaseHandler
     {
         $e = func_get_arg(0);
 
-        if ($e instanceof \ErrorException) {
-            error_log($e->__toString());
-        }
-
+        error_log($e->__toString());
         $this->failure(self::ERROR_GENERAL_FAILURE);
     }
 }
