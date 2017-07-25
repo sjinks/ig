@@ -9,17 +9,17 @@ class Result extends BaseHandler
 {
     protected function run()
     {
-        if (isset($_SESSION['user']) && !$_SESSION['user']->whitelisted && !$_SESSION['user']->paid) {
-            unset($_SESSION['user']);
-        }
-
         $guid     = func_get_arg(0);
         $response = $this->app->fbr->checkUploadStatus($guid);
 
         if ($response instanceof InProgress) {
-            $this->app->redirect('/queue/' . $guid);
+            $this->app->render('wait.phtml');
         }
         elseif ($response instanceof ResultReady) {
+            if (isset($_SESSION['user']) && !$_SESSION['user']->whitelisted && !$_SESSION['user']->paid) {
+                unset($_SESSION['user']);
+            }
+
             $data = [
                 'count' => $response->resultsAmount(),
                 'guid'  => $guid,

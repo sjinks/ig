@@ -40,7 +40,6 @@ final class Application extends \Slim\Slim
         $this->get('/logout',        new \WildWolf\Handler\LogOut($this));
         $this->get('/start',         $mw_validate_user, new \WildWolf\Handler\Start($this));
         $this->post('/upload',       $mw_validate_user, new \WildWolf\Handler\ValidateReCaptcha($this), new \WildWolf\Handler\Upload($this));
-        $this->get('/queue/:guid',   new \WildWolf\Handler\Queue($this));
         $this->get('/result/:guid',  new \WildWolf\Handler\Result($this));
         $this->get('/stats/:guid',   new \WildWolf\Handler\Stats($this));
         $this->get('/face/:guid/:n', new \WildWolf\Handler\Face($this));
