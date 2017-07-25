@@ -10,46 +10,42 @@ class Verify extends BaseHandler
         $err  = self::ERROR_AUTH_FAILED;
 
         if ($code) {
-            $err = $this->doSmsLogin($code);
+            try {
+                $err = $this->doSmsLogin($code);
+            }
+            catch (\Exception $e) {
+                // Fall through
+            }
         }
 
         if ($err) {
             $this->failure($err, true);
         }
-        else {
-            $this->app->redirect('/start');
-        }
+
+        $this->app->redirect('/start');
     }
 
     private function doSmsLogin(string $code) : int
     {
-        $err = self::ERROR_AUTH_FAILED;
-        try {
-            $d1 = $this->app->acckit->getAccessToken($code);
-            $d2 = $this->app->acckit->validateAccessToken($d1->access_token);
+        $d1  = $this->app->acckit->getAccessToken($code);
+        $d2  = $this->app->acckit->validateAccessToken($d1->access_token);
 
-            $response = $this->app->sepapi->smsLogin($d2->id, $d1->access_token, $d2->phone->number);
-            if (is_numeric($response)) {
-                $this->app->acckit->logout($d1->access_token);
-                switch ($response) {
-                    case 403:
-                        $err = self::ERROR_BANNED;
-                        break;
+        $response = $this->app->sepapi->smsLogin($d2->id, $d1->access_token, $d2->phone->number);
+        if (is_numeric($response)) {
+            $this->app->acckit->logout($d1->access_token);
+            switch ($response) {
+                case 403:
+                    return self::ERROR_BANNED;
 
-                    case 509:
-                        $err = self::ERROR_NO_CREDITS;
-                        break;
-                }
-            }
-            else {
-                $_SESSION['user'] = $response;
-                $err              = 0;
+                case 509:
+                    return self::ERROR_NO_CREDITS;
+
+                default:
+                    return self::ERROR_AUTH_FAILED;
             }
         }
-        catch (\Exception $e) {
-            // Fall through
-        }
 
-        return $err;
+        $_SESSION['user'] = $response;
+        return 0;
     }
 }

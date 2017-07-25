@@ -30,17 +30,17 @@ class Result extends BaseHandler
         }
 
         $stats = $this->app->fbr->getUploadStats($guid);
-        if (!($stats instanceof \WildWolf\FBR\Response\Stats)) {
-            $this->failure(self::ERROR_GENERAL_FAILURE);
+        if ($stats instanceof \WildWolf\FBR\Response\Stats) {
+            $data = [
+                'count' => $response->resultsAmount(),
+                'stats' => $stats,
+                'guid'  => $guid,
+                'url'   => '/uploads/' . $this->app->uploader->getTargetName($guid . '.jpg'),
+            ];
+
+            return $this->app->render('results.phtml', $data);
         }
 
-        $data = [
-            'count' => $response->resultsAmount(),
-            'stats' => $stats,
-            'guid'  => $guid,
-            'url'   => '/uploads/' . $this->app->uploader->getTargetName($guid . '.jpg'),
-        ];
-
-        $this->app->render('results.phtml', $data);
+        $this->failure(self::ERROR_GENERAL_FAILURE);
     }
 }
