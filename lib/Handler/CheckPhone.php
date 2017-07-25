@@ -6,7 +6,7 @@ class CheckPhone extends JsonHandler
 {
     protected function run()
     {
-        $phone = filter_input(INPUT_POST, 'p', FILTER_DEFAULT);
+        $phone = $this->app->request()->post('p', null);
         $body  = 0;
 
         try {

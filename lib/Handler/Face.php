@@ -9,8 +9,6 @@ class Face extends JsonHandler
         $guid     = func_get_arg(0);
         $n        = func_get_arg(1);
 
-
-
         try {
             $response = $this->app->fbr->getFaces($guid, $n);
 

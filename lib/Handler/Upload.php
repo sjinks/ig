@@ -19,8 +19,8 @@ class Upload extends BaseHandler
             $writer = $resource->getWriter();
             $mp     = $resource->megapixels();
 
-            if ($mp > 5) {
-                $factor = 1/sqrt($mp/5);
+            if ($mp > 4) {
+                $factor = 1/sqrt($mp/4);
                 $writer->resize($factor);
             }
 
@@ -46,7 +46,7 @@ class Upload extends BaseHandler
             $this->failure($code);
         }
 
-        $this->app->redirect('/queue/' . $guid);
+        $this->app->redirect('/result/' . $guid);
     }
 
     private function trackUpload()

@@ -34,7 +34,7 @@ abstract class BaseHandler
 
     public function __invoke()
     {
-        $this->code = filter_input(INPUT_GET, 'error', FILTER_SANITIZE_NUMBER_INT);
+        $this->code = (int)$this->app->request()->get('error', 0);
 
         $args = func_get_args();
         /** @scrutinizer ignore-call */$this->run(...$args);

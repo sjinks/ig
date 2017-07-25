@@ -10,9 +10,12 @@ class ValidateReCaptcha extends BaseHandler
             return;
         }
 
-        $recaptcha = $this->app->recaptcha;
-        $response  = filter_input(INPUT_POST, 'g-recaptcha-response', FILTER_DEFAULT);
-        $ip        = filter_input(INPUT_SERVER, 'REMOTE_ADDR', FILTER_DEFAULT);
+        $app       = $this->app;
+        $env       = $app->environment();
+
+        $recaptcha = $app->recaptcha;
+        $response  = $app->request()->post('g-recaptcha-response', null);
+        $ip        = $env['REMOTE_ADDR'] ?? null;
         $result    = $recaptcha->verify($response, $ip);
 
         if (!$result->isSuccess()) {
