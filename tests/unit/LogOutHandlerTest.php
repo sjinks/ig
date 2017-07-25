@@ -16,7 +16,7 @@ class LogOutHandlerTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp()
     {
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        \Slim\Environment::mock();
         $this->app = new \Slim\Slim();
 
         $acckit = $this->createMock(\WildWolf\AccountKit::class);
