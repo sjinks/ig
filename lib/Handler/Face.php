@@ -59,6 +59,8 @@ class Face extends JsonHandler
                 list($pphoto, $mphoto) = $this->findPhotos($json[9], $prefix);
             }
         }
+
+        return [$path, $link, $country, $mphoto, $pphoto];
     }
 
     private function findPhotos(array $photos, string $prefix) : array
