@@ -18,7 +18,7 @@ abstract class BaseHandler
     const ERROR_NO_CREDITS         = 10;
 
     /**
-     * @var \WildWolf\Application|\Slim\Slim
+     * @var \WildWolf\Application
      */
     protected $app;
 
