@@ -6,8 +6,8 @@ class Face extends JsonHandler
 {
     protected function run()
     {
-        $guid     = func_get_arg(0);
-        $n        = func_get_arg(1);
+        $guid = func_get_arg(0);
+        $n    = func_get_arg(1);
 
         try {
             $response = $this->app->fbr->getFaces($guid, $n);
@@ -45,16 +45,18 @@ class Face extends JsonHandler
         $link    = '#';
         $country = '';
         $m       = [];
+        $pphoto  = '';
+        $mphoto  = '';
 
         if (preg_match('!([/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2,}[/\\\\])!', $path, $m)) {
             $id      = str_replace(['/', '\\'], '', $m[1]);
             $json    = $this->psbInfo(hexdec($id));
-            $path    = $json ? $json[2] : '-';
-            $link    = $json ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : '#';
-            $country = $json ? $json[4] : '';
+            $path    = $json[2] ?? '-';
+            $link    = $json     ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : '#';
+            $country = $json[4] ?? '';
 
             $prefix = 'criminals' . str_replace('\\', '/', $m[1]);
-            if ($json[9] && preg_match('/{([^}]++)}/', $orig, $m)) {
+            if ($json && preg_match('/{([^}]++)}/', $orig, $m)) {
                 $prefix .= $m[1] . '.';
                 list($pphoto, $mphoto) = $this->findPhotos($json[9], $prefix);
             }
