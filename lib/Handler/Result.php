@@ -38,7 +38,8 @@ class Result extends BaseHandler
                 'url'   => '/uploads/' . $this->app->uploader->getTargetName($guid . '.jpg'),
             ];
 
-            return $this->app->render('results.phtml', $data);
+            $this->app->render('results.phtml', $data);
+            return;
         }
 
         $this->failure(self::ERROR_GENERAL_FAILURE);

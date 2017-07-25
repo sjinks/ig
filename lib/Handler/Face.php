@@ -32,39 +32,52 @@ class Face extends JsonHandler
 
     private function getAdditionalInformation($path) : array
     {
+        if (preg_match('![\\\\/]criminals!i', $path)) {
+            return $this->processCriminal($path);
+        }
+
+        return ['-', '#', '', '', ''];
+    }
+
+    private function processCriminal(string $path) : array
+    {
         $orig    = $path;
         $link    = '#';
         $country = '';
+        $m       = [];
+
+        if (preg_match('!([/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2,}[/\\\\])!', $path, $m)) {
+            $id      = str_replace(['/', '\\'], '', $m[1]);
+            $json    = $this->psbInfo(hexdec($id));
+            $path    = $json ? $json[2] : '-';
+            $link    = $json ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : '#';
+            $country = $json ? $json[4] : '';
+
+            $prefix = 'criminals' . str_replace('\\', '/', $m[1]);
+            if ($json[9] && preg_match('/{([^}]++)}/', $orig, $m)) {
+                $prefix .= $m[1] . '.';
+                list($pphoto, $mphoto) = $this->findPhotos($json[9], $prefix);
+            }
+        }
+    }
+
+    private function findPhotos(array $photos, string $prefix) : array
+    {
         $mphoto  = '';
         $pphoto  = '';
 
-        if (preg_match('![\\\\/]criminals!i', $path)) {
-            $m = array();
-            if (preg_match('!([/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2,}[/\\\\])!', $path, $m)) {
-                $id      = str_replace(['/', '\\'], '', $m[1]);
-                $json    = $this->psbInfo(hexdec($id));
-                $path    = $json ? $json[2] : $path;
-                $link    = $json ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : ('https://myrotvorets.center/?p=0x' .  $id);
-                $country = $json ? $json[4] : '';
+        foreach ($photos as $y) {
+            if (!$pphoto && 'image/' === substr($y[1], 0, strlen('image/'))) {
+                $pphoto = 'https://psb4ukr.natocdn.work/' . $y[0];
+            }
 
-                $prefix = 'criminals' . str_replace('\\', '/', $m[1]);
-                if ($json[9] && preg_match('/{([^}]++)}/', $orig, $m)) {
-                    $prefix .= $m[1] . '.';
-                    foreach ($json[9] as $y) {
-                        if (!$pphoto && 'image/' === substr($y[1], 0, strlen('image/'))) {
-                            $pphoto = 'https://psb4ukr.natocdn.work/' . $y[0];
-                        }
-
-                        if ($prefix === substr($y[0], 0, strlen($prefix))) {
-                            $mphoto = 'https://psb4ukr.natocdn.work/' . $y[0];
-                            break;
-                        }
-                    }
-                }
+            if ($prefix === substr($y[0], 0, strlen($prefix))) {
+                $mphoto = 'https://psb4ukr.natocdn.work/' . $y[0];
+                break;
             }
         }
 
-        return [$path, $link, $country, $mphoto, $pphoto];
+        return [$pphoto, $mphoto];
     }
 
     private function psbInfo(int $id)
