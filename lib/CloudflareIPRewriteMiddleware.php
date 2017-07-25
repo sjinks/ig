@@ -1,5 +1,7 @@
 <?php
 
+namespace WildWolf;
+
 class CloudflareIPRewriteMiddleware extends \Slim\Middleware
 {
     public function call()

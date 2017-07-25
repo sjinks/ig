@@ -1,5 +1,7 @@
 <?php
 
+namespace WildWolf;
+
 class CountryRestrictorMiddleware extends \Slim\Middleware
 {
     public function call()
@@ -25,7 +27,7 @@ class CountryRestrictorMiddleware extends \Slim\Middleware
     {
         $app = $this->getApplication();
         $env = $app->environment();
-        $cc  = $env['country_code'];
+        $cc  = $env['country_code'] ?? '';
 
         if (empty($cc) && function_exists('geoip_record_by_name')) {
             $rec = (array)geoip_record_by_name($app->request->getIp());

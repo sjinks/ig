@@ -1,5 +1,7 @@
 <?php
 
+namespace WildWolf;
+
 use WildWolf\Handler\Index;
 
 /**
