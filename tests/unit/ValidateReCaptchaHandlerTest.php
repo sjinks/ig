@@ -16,6 +16,7 @@ class ValidateReCaptchaHandlerTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp()
     {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
         $this->app     = new \Slim\Slim();
         $this->handler = new \WildWolf\Handler\ValidateReCaptcha($this->app);
     }
