@@ -16,7 +16,7 @@ class CheckPhone extends JsonHandler
                 if ($data->credits > 0) {
                     $this->app->acckit->validateAccessToken($data->token);
                     $body = 200;
-                    $_SESSION['user'] = $data;
+                    $_SESSION['user'] = new \WildWolf\User($data);
                 }
             }
             elseif (is_scalar($data)) {

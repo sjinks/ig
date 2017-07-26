@@ -25,7 +25,12 @@ class Result extends BaseHandler
 
     private function processResult(string $guid, ResultReady $response)
     {
-        if (isset($_SESSION['user']) && !$_SESSION['user']->whitelisted && !$_SESSION['user']->paid) {
+        /**
+         * @var \WildWolf\User $user
+         */
+        $user = $_SESSION['user'] ?? null;
+        if ($user && !$user->isPrivileged()) {
+            $user->logout($this->app->acckit);
             unset($_SESSION['user']);
         }
 

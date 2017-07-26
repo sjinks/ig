@@ -45,7 +45,7 @@ class Verify extends BaseHandler
             }
         }
 
-        $_SESSION['user'] = $response;
+        $_SESSION['user'] = new \WildWolf\User($response);
         return 0;
     }
 }

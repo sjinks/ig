@@ -7,15 +7,12 @@ class Index extends BaseHandler
     private function logOutOrRedirect()
     {
         if (!empty($_SESSION['user'])) {
-            $user  = $_SESSION['user'];
-            if (!$user->whitelisted && !$user->paid) {
-                try {
-                    $this->app->acckit->logout($user->token);
-                }
-                catch (\Exception $e) {
-                    // Ignore exception
-                }
-
+            /**
+             * @var \WildWolf\User $user
+             */
+            $user = $_SESSION['user'];
+            if (!$user->isPrivileged()) {
+                $user->logout($this->app->acckit);
                 unset($_SESSION['user']);
             }
             else {

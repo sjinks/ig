@@ -6,8 +6,12 @@ class Start extends BaseHandler
 {
     protected function run()
     {
+        /**
+         * @var \WildWolf\User $user
+         */
+        $user           = $_SESSION['user'];
         $error          = $this->code ? self::getErrorByCode($this->code) : null;
-        $skip_recaptcha = !empty($_SESSION['user']->whitelisted);
+        $skip_recaptcha = $user->isWhitelisted();
 
         $this->app->render('upload.phtml', ['error' => $error, 'skip_recaptcha' => $skip_recaptcha]);
     }

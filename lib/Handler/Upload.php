@@ -51,7 +51,11 @@ class Upload extends BaseHandler
 
     private function trackUpload()
     {
-        $id = $_SESSION['user']->id;
+        /**
+         * @var \WildWolf\User $user
+         */
+        $user = $_SESSION['user'];
+        $id   = $user->id();
 
         $response = $this->app->sepapi->trackUpload($id);
         $code     = self::ERROR_GENERAL_FAILURE;
@@ -66,7 +70,8 @@ class Upload extends BaseHandler
                     break;
 
                 default:
-                    $_SESSION['user']->credits = $response;
+                    // $_SESSION will be updated as well
+                    $user->setCredits($response);
                     return;
             }
         }
