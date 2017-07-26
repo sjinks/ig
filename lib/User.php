@@ -5,13 +5,13 @@ namespace WildWolf;
 class User
 {
     private $id;
-    private $fbid;
-    private $phone;
+//     private $fbid;
+//     private $phone;
     private $whitelisted;
     private $paid;
-    private $banned;
+//     private $banned;
     private $credits;
-    private $lastseen;
+//     private $lastseen;
     private $token;
 
     public function __construct(\stdClass $obj)
@@ -43,7 +43,7 @@ class User
     public function logout(\WildWolf\AccountKit $kit)
     {
         try {
-            $acckit->logout($this->token);
+            $kit->logout($this->token);
         }
         catch (\Exception $e) {
             // Ignore exception
