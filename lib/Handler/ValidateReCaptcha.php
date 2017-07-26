@@ -9,9 +9,9 @@ class ValidateReCaptcha extends BaseHandler
         /**
          * @var \WildWolf\User $user
          */
-        $user = $_SESSION['user'];
+        $user = $_SESSION['user'] ?? null;
 
-        if (!$user->isWhitelisted()) {
+        if (!$user || !$user->isWhitelisted()) {
             $app       = $this->app;
             $env       = $app->environment();
 

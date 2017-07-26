@@ -2,6 +2,8 @@
 
 namespace WildWolf\Test;
 
+use WildWolf\User;
+
 class LogOutHandlerTest extends \PHPUnit\Framework\TestCase
 {
     /**
@@ -50,11 +52,7 @@ class LogOutHandlerTest extends \PHPUnit\Framework\TestCase
 
     public function testLoggedInUser()
     {
-        $_SESSION = [
-            'user' => (object)[
-                'token' => 'sometoken',
-            ]
-        ];
+        $_SESSION = ['user' => User::mock()];
 
         try {
             ($this->handler)();
