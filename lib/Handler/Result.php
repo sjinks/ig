@@ -36,11 +36,13 @@ class Result extends BaseHandler
 
         $stats = $this->app->fbr->getUploadStats($guid);
         if ($stats instanceof \WildWolf\FBR\Response\Stats) {
-            $data = [
-                'count' => $response->resultsAmount(),
-                'stats' => $stats,
-                'guid'  => $guid,
-                'url'   => '/uploads/' . $this->app->uploader->getTargetName($guid . '.jpg'),
+            $iframe = filter_input(INPUT_GET, 'iframe', FILTER_SANITIZE_NUMBER_INT);
+            $data   = [
+                'count'  => $response->resultsAmount(),
+                'stats'  => $stats,
+                'guid'   => $guid,
+                'url'    => '/uploads/' . $this->app->uploader->getTargetName($guid . '.jpg'),
+                'iframe' => $iframe,
             ];
 
             $this->app->render('results.phtml', $data);

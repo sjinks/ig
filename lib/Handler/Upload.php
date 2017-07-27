@@ -24,7 +24,6 @@ class Upload extends BaseHandler
                 $writer->resize($factor);
             }
 
-            $this->trackUpload();
             $response = $this->app->fbr->uploadFile($writer->toString());
             if (!($response instanceof UploadAck)) {
                 $this->failure(self::ERROR_GENERAL_FAILURE);
@@ -32,6 +31,7 @@ class Upload extends BaseHandler
 
             $guid = $response->serverRequestId();
             $file = $guid . '.jpg';
+            $this->trackUpload($guid);
 
             $this->app->uploader->saveAsJpeg($resource, $file);
         }
@@ -49,15 +49,17 @@ class Upload extends BaseHandler
         $this->app->redirect('/result/' . $guid);
     }
 
-    private function trackUpload()
+    private function trackUpload(string $guid)
     {
         /**
          * @var \WildWolf\User $user
          */
         $user = $_SESSION['user'];
         $id   = $user->id();
+        $env  = $this->app->environment();
+        $ip   = $env['REMOTE_ADDR'];
 
-        $response = $this->app->sepapi->trackUpload($id);
+        $response = $this->app->sepapi->trackUpload($id, $guid, $ip, time());
         $code     = self::ERROR_GENERAL_FAILURE;
         if (is_scalar($response)) {
             switch ($response) {
