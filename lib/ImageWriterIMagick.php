@@ -11,6 +11,7 @@ class ImageWriterIMagick extends ImageWriter implements ImageWriterInterface
     public function save($f)
     {
         $this->im->setImageFormat(strtoupper($this->fmt));
+        $this->im->SetImageProperty('jpeg:sampling-factor', '4:2:2');
         $res = $this->im->writeImageFile($f);
         if (!$res) {
             throw new ImageUploaderException('', ImageUploader::ERROR_GENERAL_FAILURE);
@@ -30,6 +31,7 @@ class ImageWriterIMagick extends ImageWriter implements ImageWriterInterface
     public function toString() : string
     {
         $this->im->setImageFormat(strtoupper($this->fmt));
+        $this->im->SetImageProperty('jpeg:sampling-factor', '4:2:2');
         return $this->im->getImageBlob();
     }
 }
