@@ -43,6 +43,7 @@ class Result extends BaseHandler
                 'guid'   => $guid,
                 'url'    => '/uploads/' . $this->app->uploader->getTargetName($guid . '.jpg'),
                 'iframe' => $iframe,
+                'title'  => 'Результати розпізнавання',
             ];
 
             $this->app->render('results.phtml', $data);
