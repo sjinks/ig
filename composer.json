@@ -22,7 +22,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
-        "phpunit/phpunit": "^6.2",
-        "cache/integration-tests": "dev-master"
+        "phpunit/phpunit": "^6.2"
     }
 }
