@@ -27,8 +27,8 @@ class Verify extends BaseHandler
 
     private function doSmsLogin(string $code) : int
     {
-        $d1  = $this->app->acckit->getAccessToken($code);
-        $d2  = $this->app->acckit->validateAccessToken($d1->access_token);
+        $d1 = $this->app->acckit->getAccessToken($code);
+        $d2 = $this->app->acckit->validateAccessToken($d1->access_token);
 
         $response = $this->app->sepapi->smsLogin($d2->id, $d1->access_token, $d2->phone->number);
         if (is_numeric($response)) {
