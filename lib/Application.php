@@ -34,16 +34,21 @@ final class Application extends \Slim\Slim
             'n'    => '[1-9][0-9]*'
         ]);
 
-        $mw_validate_user = new \WildWolf\Handler\ValidateUser($this);
+        $mw_validate_user      = new \WildWolf\Handler\ValidateUser($this);
+        $mw_validate_recaptcha = new \WildWolf\Handler\ValidateReCaptcha($this);
 
-        $this->get('/',              new \WildWolf\Handler\Index($this));
-        $this->post('/checkphone',   new \WildWolf\Handler\CheckPhone($this));
-        $this->get('/verify',        new \WildWolf\Handler\Verify($this));
-        $this->get('/logout',        new \WildWolf\Handler\LogOut($this));
-        $this->get('/start',         $mw_validate_user, new \WildWolf\Handler\Start($this));
-        $this->post('/upload',       $mw_validate_user, new \WildWolf\Handler\ValidateReCaptcha($this), new \WildWolf\Handler\Upload($this));
-        $this->get('/result/:guid',  new \WildWolf\Handler\Result($this));
-        $this->get('/face/:guid/:n', new \WildWolf\Handler\Face($this));
+        $this->get('/',                new \WildWolf\Handler\Index($this));
+        $this->post('/checkphone',     new \WildWolf\Handler\CheckPhone($this));
+        $this->get('/verify',          new \WildWolf\Handler\Verify($this));
+        $this->get('/logout',          new \WildWolf\Handler\LogOut($this));
+        $this->get('/start',           $mw_validate_user, new \WildWolf\Handler\Start($this));
+        $this->post('/upload',         $mw_validate_user, $mw_validate_recaptcha, new \WildWolf\Handler\Upload($this));
+        $this->get('/result/:guid',    new \WildWolf\Handler\Result($this));
+        $this->get('/face/:guid/:n',   new \WildWolf\Handler\Face($this));
+        $this->get('/start2',          $mw_validate_user, new \WildWolf\Handler\Compare($this));
+        $this->post('/uploadcmp',      $mw_validate_user, $mw_validate_recaptcha, new \WildWolf\Handler\UploadCompare($this));
+        $this->get('/uploadcmp/:guid', $mw_validate_user, new \WildWolf\Handler\UploadCompareWait($this));
+        $this->get('/cresult/:guid',   new \WildWolf\Handler\CompareResult($this));
     }
 
     private function setUpDI()

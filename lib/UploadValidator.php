@@ -10,11 +10,11 @@ abstract class UploadValidator
     const ERROR_FILE_TOO_SMALL     = 2;
     const ERROR_FILE_TOO_BIG       = 5;
 
-    public static function isUploadedFile(string $key)
+    public static function isUploadedFile(array $entry = null)
     {
-        $fail =    empty($_FILES[$key])
-                || UPLOAD_ERR_OK !== $_FILES[$key]['error']
-                || !is_uploaded_file($_FILES[$key]['tmp_name'])
+        $fail =    empty($entry)
+                || UPLOAD_ERR_OK !== $entry['error']
+                || !is_uploaded_file($entry['tmp_name'])
         ;
 
         if ($fail) {
@@ -22,9 +22,9 @@ abstract class UploadValidator
         }
     }
 
-    public static function isValidSize(string $key, int $min, int $max)
+    public static function isValidSize(array $entry, int $min, int $max)
     {
-        $size = $_FILES[$key]['size'];
+        $size = $entry['size'];
         if ($size < $min) {
             throw new ImageUploaderException('', self::ERROR_FILE_TOO_SMALL);
         }

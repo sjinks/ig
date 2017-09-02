@@ -116,12 +116,12 @@ class ImageUploader
         return $type;
     }
 
-    public function validateFile(string $key) : array
+    public function validateFile(array $entry = null) : array
     {
-        UploadValidator::isUploadedFile($key);
-        UploadValidator::isValidSize($key, 0, $this->max_upload_size);
+        UploadValidator::isUploadedFile($entry);
+        UploadValidator::isValidSize($entry, 0, $this->max_upload_size);
 
-        $fname = $_FILES[$key]['tmp_name'];
+        $fname = $entry['tmp_name'];
         $type  = $this->validateImageType($fname);
         $res   = ImageReader::getReader($fname, $type);
         $res->load();

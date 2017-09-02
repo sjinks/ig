@@ -16,6 +16,7 @@ abstract class BaseHandler
     const ERROR_RECAPTCHA          = 8;
     const ERROR_BANNED             = 9;
     const ERROR_NO_CREDITS         = 10;
+    const ERROR_BAD_RESOLUTION     = 11;
 
     /**
      * @var \WildWolf\Application
@@ -54,7 +55,8 @@ abstract class BaseHandler
             self::ERROR_AUTH_FAILED        => 'Верифікація не вдалася, спробуйте ще раз.',
             self::ERROR_RECAPTCHA          => 'Ви не змогли пройти ReCaptcha. Якщо ви не бот, спробуйте ще раз.',
             self::ERROR_BANNED             => 'Будь ласка, спробуйте пізніше.',
-            self::ERROR_NO_CREDITS         => 'Кількість безкоштовних спроб досягнуто. Будь ласка, спробуйте ще раз завтра.'
+            self::ERROR_NO_CREDITS         => 'Кількість безкоштовних спроб досягнуто. Будь ласка, спробуйте ще раз завтра.',
+            self::ERROR_BAD_RESOLUTION     => 'Невірна роздільна здатність світлини.',
         ];
 
         return $errors[$code] ?? 'Невідома помилка';

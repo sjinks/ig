@@ -26,6 +26,14 @@ class Index extends BaseHandler
         }
 
         $error = $this->code ? self::getErrorByCode($this->code) : null;
-        $this->app->render('index.phtml', ['error' => $error, 'app_id' => $this->app->config('fb.app_id')]);
+        $this->app->render(
+            'index.phtml',
+            [
+                'error'     => $error,
+                'app_id'    => $this->app->config('fb.app_id'),
+                'header_js' => ['https://sdk.accountkit.com/uk_UA/sdk.js'],
+                'footer_js' => ['/js/index.js']
+            ]
+        );
     }
 }

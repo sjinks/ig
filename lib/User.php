@@ -64,7 +64,7 @@ class User
 
     public function isWhitelisted()
     {
-        return (bool)$this->whitelisted;
+        return $this->whitelisted > 0;
     }
 
     public function isPaid()

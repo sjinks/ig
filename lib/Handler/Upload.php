@@ -12,10 +12,11 @@ class Upload extends BaseHandler
         $code = 0;
 
         try {
+            $entry = $_FILES['photo'] ?? [];
             /**
              * @var ImageReader $resource
              */
-            list($resource, $type) = $this->app->uploader->validateFile('photo');
+            list($resource, $type) = $this->app->uploader->validateFile($entry);
             $writer = $resource->getWriter();
             $mp     = $resource->megapixels();
 

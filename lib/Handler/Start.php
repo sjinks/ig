@@ -13,6 +13,15 @@ class Start extends BaseHandler
         $error          = $this->code ? self::getErrorByCode($this->code) : null;
         $skip_recaptcha = $user->isWhitelisted();
 
-        $this->app->render('upload.phtml', ['error' => $error, 'skip_recaptcha' => $skip_recaptcha, 'title' => 'Завантажити світлину']);
+        $this->app->render(
+            'upload.phtml',
+            [
+                'error'          => $error,
+                'skip_recaptcha' => $skip_recaptcha,
+                'title'          => 'Завантажити світлину',
+                'recaptcha'      => $this->app->config('recaptcha.public'),
+                'footer_js'      => ['https://www.google.com/recaptcha/api.js'],
+            ]
+        );
     }
 }

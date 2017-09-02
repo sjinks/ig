@@ -32,7 +32,7 @@ class Face extends JsonHandler
 
     private function getAdditionalInformation($path) : array
     {
-        if (preg_match('![\\\\/]criminals!i', $path)) {
+        if (preg_match('!(?:^|[\\\\/])criminals!i', $path)) {
             return $this->processCriminal($path);
         }
 
