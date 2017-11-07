@@ -17,7 +17,8 @@ class Result extends BaseHandler
                 'wait.phtml',
                 [
                     'title'     => 'Зачекайте, будь ласка',
-                    'footer_js' => ['/js/wait.js?v=1'],
+                    'timeout'   => 10000,
+                    'footer_js' => ['/js/wait.js?v=3'],
                 ]
             );
         }

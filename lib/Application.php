@@ -45,9 +45,7 @@ final class Application extends \Slim\Slim
         $this->post('/upload',         $mw_validate_user, $mw_validate_recaptcha, new \WildWolf\Handler\Upload($this));
         $this->get('/result/:guid',    new \WildWolf\Handler\Result($this));
         $this->get('/face/:guid/:n',   new \WildWolf\Handler\Face($this));
-        $this->get('/start2',          $mw_validate_user, new \WildWolf\Handler\Compare($this));
         $this->post('/uploadcmp',      $mw_validate_user, $mw_validate_recaptcha, new \WildWolf\Handler\UploadCompare($this));
-        $this->get('/uploadcmp/:guid', $mw_validate_user, new \WildWolf\Handler\UploadCompareWait($this));
         $this->get('/cresult/:guid',   new \WildWolf\Handler\CompareResult($this));
     }
 

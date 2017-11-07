@@ -55,7 +55,7 @@ class Face extends JsonHandler
             $link    = $json     ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : '#';
             $country = $json[4] ?? '';
 
-            $prefix = 'criminals' . str_replace('\\', '/', $m[1]);
+            $prefix = 'criminals' . strtolower(str_replace('\\', '/', $m[1]));
             if ($json && preg_match('/{([^}]++)}/', $orig, $m)) {
                 $prefix .= $m[1] . '.';
                 list($pphoto, $mphoto) = $this->findPhotos($json[9] ?? [], $prefix);

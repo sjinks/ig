@@ -80,6 +80,6 @@ class UploadCompare extends BaseHandler
             $this->failure($code);
         }
 
-        $this->app->redirect('/uploadcmp/' . $guid);
+        $this->app->redirect('/cresult/' . $guid);
     }
 }

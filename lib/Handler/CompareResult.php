@@ -11,12 +11,30 @@ class CompareResult extends BaseHandler
         $guid     = func_get_arg(0);
         $response = $this->app->fbr->getComparisonResults($guid);
 
-        if ($response instanceof CompareCompleted && $response->cacheable()) {
-            $this->processResult($guid, $response);
+        if ($response instanceof CompareCompleted) {
+            if ($response->cacheable()) {
+                $this->processResult($guid, $response);
+            }
+            elseif ($response->resultCode() == 2) {
+                $this->wait();
+            }
+
+            return;
         }
-        else {
-            $this->failure(self::ERROR_GENERAL_FAILURE);
-        }
+
+        $this->failure(self::ERROR_GENERAL_FAILURE);
+    }
+
+    private function wait()
+    {
+        $this->app->render(
+            'wait.phtml',
+            [
+                'title'     => 'Зачекайте, будь ласка',
+                'timeout'   => 5000,
+                'footer_js' => ['/js/wait.js?v=3'],
+            ]
+        );
     }
 
     private function processResult(string $guid, CompareCompleted $response)
@@ -43,7 +61,7 @@ class CompareResult extends BaseHandler
 
         if ($response->resultCode() == 3) {
             /**
-             * @var $x \WildWolf\FBR\CompareResult
+             * @var $x \WildWolf\FBR\Response\Parts\CompareResult
              */
             foreach ($response as $x) {
                 $idx = (int)$x->name();

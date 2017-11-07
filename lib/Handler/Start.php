@@ -20,7 +20,10 @@ class Start extends BaseHandler
                 'skip_recaptcha' => $skip_recaptcha,
                 'title'          => 'Завантажити світлину',
                 'recaptcha'      => $this->app->config('recaptcha.public'),
-                'footer_js'      => ['https://www.google.com/recaptcha/api.js'],
+                'footer_js'      => [
+                    '/js/upload.js?v=2',
+                    'https://www.google.com/recaptcha/api.js?onload=reCaptchaCallback&render=explicit',
+                ],
             ]
         );
     }
