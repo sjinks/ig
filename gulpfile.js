@@ -1,8 +1,9 @@
 'use strict';
 
-var gulp = require('gulp');
-var del  = require('del');
-var exec = require('gulp-exec');
+var gulp   = require('gulp');
+var del    = require('del');
+var exec   = require('gulp-exec');
+var gulpif = require('gulp-if');
 var gulpLoadPlugins = require('gulp-load-plugins');
 
 const $ = gulpLoadPlugins();
@@ -69,9 +70,9 @@ gulp.task('styles', gulp.series('clean:styles', function() {
 	return gulp.src(['public-dev/css/**/*.css'])
 		.pipe($.newer('.tmp/styles'))
 		.pipe($.sourcemaps.init())
-		.pipe($.sass({ precision: 10 }).on('error', $.sass.logError))
 		.pipe($.autoprefixer(AUTOPREFIXER_BROWSERS))
 		.pipe(gulp.dest('.tmp/styles'))
+		.pipe(gulpif('*.css', $.cssnano()))
 		.pipe($.size({title: 'styles'}))
 		.pipe($.sourcemaps.write('./'))
 		.pipe(gulp.dest('public/css'))
