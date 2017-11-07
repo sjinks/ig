@@ -6,21 +6,24 @@ class CountryRestrictorMiddleware extends \Slim\Middleware
 {
     public function call()
     {
-        $cc = $this->getCountryCode();
+        $app    = $this->getApplication();
+        $ip     = $this->getIp();
+        $cc     = $this->getCountryCode();
 
-        if (!empty($cc)) {
-            if ('RU' === $cc) {
-                $this->app->render('russia.phtml', [], 403);
-                return;
-            }
+        $wl_ips = (array)$app->config('whitelist.ips');
+        $wl_ccs = (array)$app->config('whitelist.countries');
 
-            if ('UA' !== $cc) {
-                $this->app->render('403.phtml', [], 403);
-                return;
-            }
+        if (in_array($ip, $wl_ips) || empty($cc) || in_array($cc, $wl_ccs)) {
+            $this->next->call();
+            return;
         }
 
-        $this->next->call();
+        if ('RU' === $cc) {
+            $this->app->render('russia.phtml', [], 403);
+        }
+        else {
+            $this->app->render('403.phtml', [], 403);
+        }
     }
 
     private function getCountryCode()
@@ -35,5 +38,12 @@ class CountryRestrictorMiddleware extends \Slim\Middleware
         }
 
         return $cc;
+    }
+
+    private function getIp() : string
+    {
+        $app = $this->getApplication();
+        $env = $app->environment();
+        return $env['REMOTE_ADDR'] ?? '';
     }
 }
