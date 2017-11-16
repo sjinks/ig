@@ -25,7 +25,7 @@ class Upload extends BaseHandler
                 $writer->resize($factor);
             }
 
-            $response = $this->app->fbr->uploadFile($writer->toString());
+            $response = $this->app->fbr->uploadPhotoForSearch($writer->toString());
             if (!($response instanceof UploadAck)) {
                 $this->failure(self::ERROR_GENERAL_FAILURE);
             }

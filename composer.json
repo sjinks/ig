@@ -6,7 +6,7 @@
         "php": ">=7.0",
         "ext-openssl": "*",
         "ext-gd": "*",
-        "wildwolf/fbr": "^2.0",
+        "wildwolf/fbr": "dev-master",
         "wildwolf/accountkit": "dev-master",
         "google/recaptcha": "~1.1",
         "cloudflare/cf-ip-rewrite": "^1.0",
