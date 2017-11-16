@@ -10,9 +10,9 @@ class Face extends JsonHandler
         $n    = func_get_arg(1);
 
         try {
-            $response = $this->app->fbr->getFaces($guid, $n);
+            $response = $this->app->fbr->getMatchedFaces($guid, $n);
 
-            if (!($response instanceof \WildWolf\FBR\Response\Match)) {
+            if (!($response instanceof \WildWolf\FBR\Response\MatchedFaces)) {
                 $this->error();
             }
 

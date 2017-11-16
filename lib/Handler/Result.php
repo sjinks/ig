@@ -2,17 +2,17 @@
 
 namespace WildWolf\Handler;
 
-use WildWolf\FBR\Response\InProgress;
-use WildWolf\FBR\Response\ResultReady;
+use WildWolf\FBR\Response\SearchInProgress;
+use WildWolf\FBR\Response\SearchCompleted;
 
 class Result extends BaseHandler
 {
     protected function run()
     {
         $guid     = func_get_arg(0);
-        $response = $this->app->fbr->checkUploadStatus($guid);
+        $response = $this->app->fbr->checkSearchStatus($guid);
 
-        if ($response instanceof InProgress) {
+        if ($response instanceof SearchInProgress) {
             $this->app->render(
                 'wait.phtml',
                 [
@@ -22,7 +22,7 @@ class Result extends BaseHandler
                 ]
             );
         }
-        elseif ($response instanceof ResultReady) {
+        elseif ($response instanceof SearchCompleted) {
             $this->processResult($guid, $response);
         }
         else {
@@ -30,7 +30,7 @@ class Result extends BaseHandler
         }
     }
 
-    private function processResult(string $guid, ResultReady $response)
+    private function processResult(string $guid, SearchCompleted $response)
     {
         /**
          * @var \WildWolf\User $user
@@ -41,8 +41,8 @@ class Result extends BaseHandler
             unset($_SESSION['user']);
         }
 
-        $stats = $this->app->fbr->getUploadStats($guid);
-        if ($stats instanceof \WildWolf\FBR\Response\Stats) {
+        $stats = $this->app->fbr->getCapturedFaces($guid);
+        if ($stats instanceof \WildWolf\FBR\Response\CapturedFaces) {
             $iframe = filter_input(INPUT_GET, 'iframe', FILTER_SANITIZE_NUMBER_INT);
             $data   = [
                 'count'      => $response->resultsAmount(),

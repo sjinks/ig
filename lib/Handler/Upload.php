@@ -2,7 +2,7 @@
 
 namespace WildWolf\Handler;
 
-use WildWolf\FBR\Response\UploadAck;
+use WildWolf\FBR\Response\SearchUploadAck;
 use WildWolf\ImageReader;
 
 class Upload extends BaseHandler
@@ -25,8 +25,8 @@ class Upload extends BaseHandler
                 $writer->resize($factor);
             }
 
-            $response = $this->app->fbr->uploadFile($writer->toString());
-            if (!($response instanceof UploadAck)) {
+            $response = $this->app->fbr->uploadPhotoForSearch($writer->toString());
+            if (!($response instanceof SearchUploadAck)) {
                 $this->failure(self::ERROR_GENERAL_FAILURE);
             }
 
