@@ -30,8 +30,7 @@ $config    = require __DIR__ . '/../config/config.php';
 $app       = new App(['settings' => $config]);
 $container = $app->getContainer();
 $provider  = new ServiceProvider();
-assert($container instanceof ArrayAccess);
-$provider->register($container);
+$provider->register(/** @scrutinizer ignore-type */ $container);
 
 $app
     ->add(new Session())

@@ -97,9 +97,8 @@ class SearchController extends BaseController
             }
 
             $f = fopen($fname, 'rb');
-            assert(is_resource($f));
-            $r = $this->fbr->uploadPhotoForSearch($f);
-            fclose($f);
+            $r = $this->fbr->uploadPhotoForSearch(/** @scrutinizer ignore-type */ $f);
+            fclose(/** @scrutinizer ignore-type */ $f);
             if (!($r instanceof SearchUploadAck)) {
                 return $this->failure($response, self::ERROR_GENERAL_FAILURE);
             }

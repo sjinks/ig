@@ -202,8 +202,7 @@ class ImageUploader
         try {
             $f0 = fopen($this->entry['tmp_name'], 'rb');
 
-            assert(is_resource($f0));
-            if (!stream_copy_to_stream($f0, $f1)) {
+            if (!stream_copy_to_stream(/** @scrutinizer ignore-type */ $f0, $f1)) {
                 throw new ImageUploaderException("File copy failed.", self::ERROR_UPLOAD_FAILURE);
             }
         }

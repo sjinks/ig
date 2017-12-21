@@ -60,11 +60,7 @@ class CompareController extends BaseController
                 $this->uploader->setFile($x);
                 $this->uploader->validateFile();
 
-//                 $mp = $resource->megapixels();
-//                 if ($mp > 5 || $mp < 0.08) {
-//                     throw new \Exception('', self::ERROR_BAD_RESOLUTION);
-//                 }
-
+                /// TODO: check if the photo is 0.08..5 Mpix
                 $resources[] = fopen($x['tmp_name'], 'rb');
             }
 
@@ -76,7 +72,7 @@ class CompareController extends BaseController
             $guid = $r->serverRequestId();
             $cnt  = count($resources);
             for ($i=1; $i<$cnt; ++$i) {
-                $r = $this->fbr->uploadRefPhoto($guid, $resources[$i], $i, count($resources) - 1, $i);
+                $r = $this->fbr->uploadRefPhoto($guid, $resources[$i], $i, $cnt - 1, (string)$i);
                 if (!($r instanceof UploadCompareAck)) {
                     throw new \Exception('', self::ERROR_GENERAL_FAILURE);
                 }
