@@ -1,100 +1,135 @@
 'use strict';
 
-var gulp   = require('gulp');
-var del    = require('del');
-var exec   = require('gulp-exec');
-var gulpif = require('gulp-if');
-var gulpLoadPlugins = require('gulp-load-plugins');
+var gulp         = require('gulp');
+var del          = require('del');
+var autoprefixer = require('gulp-autoprefixer');
+var rename       = require('gulp-rename');
+var sourcemaps   = require('gulp-sourcemaps');
+var cleancss     = require('gulp-clean-css');
+var sass         = require('gulp-sass');
+var uglify       = require('gulp-uglify');
+var exec         = require('gulp-exec');
+var imagemin     = require('gulp-imagemin');
+var htmlmin      = require('gulp-htmlmin');
+var prune        = require('gulp-prune');
+var newer        = require('gulp-newer');
+var include      = require('gulp-include');
 
-const $ = gulpLoadPlugins();
-
-gulp.task('clean', function(done) {
-	del(['.tmp', 'public/**', '!public', '!public/uploads']);
-	done();
+gulp.task('clean:images', function() {
+	return del(['public/img']);
 });
 
-gulp.task('clean:images', function(done) {
-	del(['public/img']);
-	done();
+gulp.task('clean:css', function() {
+	return del(['public/css']);
 });
 
-gulp.task('clean:styles', function(done) {
-	del(['.tmp/styles', 'public/css']);
-	done();
+gulp.task('clean:js', function() {
+	return del(['public/js']);
 });
 
-gulp.task('clean:scripts', function(done) {
-	del(['.tmp/scripts', 'public/js']);
-	done();
-});
-
-gulp.task('clean:files', function(done) {
-	del([
+gulp.task('clean:files', function() {
+	return del([
 		'./public/*',
 		'!./public/css',
 		'!./public/img',
 		'!./public/js',
 		'!./public/uploads',
 	]);
-	done();
 });
 
-gulp.task('images', gulp.series('clean:images', function() {
-	return gulp.src('public-dev/img/**/*')
-		.pipe(
-			$.cache(
-				$.imagemin({
-					progressive: true,
-					interlaced: true
-				})
-			)
-		)
-		.pipe(gulp.dest('public/img'))
-		.pipe($.size({title: 'images'}))
+gulp.task('clean', function() {
+	return del(['public/**', '!public', '!public/uploads']);
+});
+
+gulp.task('images', function() {
+	var src  = ['public-dev/img/**/*'];
+	var dest = 'public/img';
+	return gulp.src(src)
+		.pipe(prune(dest))
+		.pipe(newer(dest))
+		.pipe(imagemin([
+			imagemin.gifsicle({interlaced: true}),
+			imagemin.jpegtran({progressive: true}),
+			imagemin.optipng({optimizationLevel: 9})
+		]))
+		.pipe(gulp.dest(dest))
 	;
-}));
+});
 
-gulp.task('styles', gulp.series('clean:styles', function() {
-	const AUTOPREFIXER_BROWSERS = [
-		'ie >= 10',
-		'ie_mob >= 10',
-		'ff >= 30',
-		'chrome >= 34',
-		'safari >= 7',
-		'opera >= 23',
-		'ios >= 7',
-		'android >= 4.4',
-		'bb >= 10'
-	];
-
-	return gulp.src(['public-dev/css/**/*.css'])
-		.pipe($.newer('.tmp/styles'))
-		.pipe($.sourcemaps.init())
-		.pipe($.autoprefixer(AUTOPREFIXER_BROWSERS))
-		.pipe(gulp.dest('.tmp/styles'))
-		.pipe(gulpif('*.css', $.cssnano()))
-		.pipe($.size({title: 'styles'}))
-		.pipe($.sourcemaps.write('./'))
-		.pipe(gulp.dest('public/css'))
-		.pipe(gulp.dest('.tmp/styles'))
+gulp.task('css', function() {
+	var src  = ['public-dev/css/**/*.scss'];
+	var dest = 'public/css';
+	return gulp.src(src)
+		.pipe(prune({
+			dest: dest,
+			ext: ['.css.map', '.css']
+		}))
+		.pipe(newer({
+			dest: dest,
+			ext: '.css'
+		}))
+		.pipe(sourcemaps.init())
+		.pipe(sass({
+			errLogToConsole: true,
+			outputStyle: 'expanded',
+			precision: 5
+		}))
+		.pipe(autoprefixer({browsers: '> 5%'}))
+		.pipe(cleancss())
+		.pipe(sourcemaps.write('.'))
+		.pipe(gulp.dest(dest))
 	;
-}));
+});
 
-gulp.task('scripts', gulp.series('clean:scripts', function() {
-	return gulp.src(['./public-dev/js/*.js'])
-		.pipe($.newer('.tmp/scripts'))
-		.pipe($.sourcemaps.init())
-		.pipe($.sourcemaps.write())
-		.pipe(gulp.dest('.tmp/scripts'))
-		.pipe($.uglify({preserveComments: 'some'}))
-		.pipe($.size({title: 'scripts'}))
-		.pipe($.sourcemaps.write('.'))
+gulp.task('js', function() {
+	var src  = ['./public-dev/js/*.js'];
+	var dest = 'public/js';
+	return gulp.src(src)
+		.pipe(prune({
+			dest: dest,
+			ext: ['.js.map', '.js']
+		}))
+		.pipe(newer(dest))
+		.pipe(sourcemaps.init())
+		.pipe(uglify())
+		.pipe(sourcemaps.write('.'))
 		.pipe(gulp.dest('public/js'))
-		.pipe(gulp.dest('.tmp/scripts'))
 	;
-}));
+});
 
-gulp.task('copy', gulp.series('clean:files', function(done) {
+gulp.task('html', function() {
+	var src  = ['./templates-dev/*.phtml'];
+	var dest = 'templates';
+	return gulp.src(src)
+		.pipe(prune(dest))
+		.pipe(newer({
+			dest: dest,
+			extra: ['./templates-dev/*.inc']
+		}))
+		.pipe(include())
+		.pipe(htmlmin({
+			removeComments: true,
+			collapseWhitespace: true,
+			caseSensitive: true,
+			decodeEntities: true,
+			keepClosingSlash: true,
+			collapseBooleanAttributes: false,
+			removeAttributeQuotes: false,
+			removeRedundantAttributes: true,
+			removeEmptyAttributes: true,
+			removeScriptTypeAttributes: true,
+			removeStyleLinkTypeAttributes: true,
+			removeOptionalTags: false,
+			processScripts: ['text/jsrender'],
+			includeAutoGeneratedTags: false,
+			minifyJS: false,
+			minifyCSS: true
+		}))
+		.pipe(gulp.dest(dest))
+	;
+});
+
+gulp.task('copy', ['clean:files'], function(done) {
 	gulp.src([
 		'./public-dev/*',
 		'!./public-dev/css',
@@ -107,6 +142,6 @@ gulp.task('copy', gulp.series('clean:files', function(done) {
 	;
 
 	done();
-}));
+});
 
-gulp.task('default', gulp.parallel('images', 'styles', 'scripts', 'copy'));
+gulp.task('default', ['images', 'css', 'js', 'html', 'copy']);

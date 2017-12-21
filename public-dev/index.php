@@ -1,17 +1,61 @@
 <?php
+
+use Slim\App;
+use WildWolf\CompareController;
+use WildWolf\SearchController;
+use WildWolf\ServiceProvider;
+use WildWolf\UserController;
+use WildWolf\Middleware\CloudflareIPRewrite;
+use WildWolf\Middleware\CountryRestrictor;
+use WildWolf\Middleware\IPResolver;
+use WildWolf\Middleware\Session;
+use WildWolf\Middleware\ValidateReCaptcha;
+use WildWolf\Middleware\ValidateUser;
+
 require '../vendor/autoload.php';
 
-if (empty($_ENV['SLIM_MODE'])) {
-    $_ENV['SLIM_MODE'] = 'production'; // or 'development'
+function exception_error_handler($severity, $message, $file, $line)
+{
+    if (!(error_reporting() & $severity)) {
+        return;
+    }
+
+    error_log("$message $file $line");
+    throw new \ErrorException($message, 0, $severity, $file, $line);
 }
 
-$app = new \WildWolf\Application();
-$app->add(new \WildWolf\CountryRestrictorMiddleware());
-$app->add(new \WildWolf\CloudflareIPRewriteMiddleware());
+set_error_handler("exception_error_handler");
 
-foreach (['development', 'production'] as $env) {
-    $app->configureMode($env, function () use ($app, $env) { $app->config(require __DIR__ . '/../config/' . $env . '.php'); });
-}
+$config    = require __DIR__ . '/../config/config.php';
+$app       = new App(['settings' => $config]);
+$container = $app->getContainer();
+$provider  = new ServiceProvider();
+$provider->register($container);
 
-$app->init();
+$app
+    ->add(new Session($app))
+    ->add(new CountryRestrictor($app))
+    ->add(new IPResolver($app))
+    ->add(new CloudflareIPRewrite($app))
+;
+
+$validate_user      = new ValidateUser();
+$validate_recaptcha = new ValidateReCaptcha($app);
+
+$guid = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
+$n    = '[1-9][0-9]*';
+
+$app->get('/',                             UserController::class . ':index');
+$app->post('/checkphone',                  UserController::class . ':checkPhone');
+$app->get('/verify',                       UserController::class . ':verify');
+$app->get('/logout',                       UserController::class . ':logout');
+
+$app->get('/start',                        SearchController::class . ':start')->add($validate_user);
+$app->post('/upload',                      SearchController::class . ':upload')->add($validate_recaptcha)->add($validate_user);
+$app->get("/result/{guid:{$guid}}",        SearchController::class . ':result');
+$app->get("/face/{guid:{$guid}}/{n:{$n}}", SearchController::class . ':face');
+
+$app->post('/uploadcmp',                   CompareController::class . ':upload')->add($validate_recaptcha)->add($validate_user);
+$app->get("/cresult/{guid:{$guid}}",       CompareController::class . ':result');
+
 $app->run();

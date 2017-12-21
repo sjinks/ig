@@ -2,13 +2,11 @@
 
 namespace WildWolf;
 
-use WildWolf\ImageUploaderException;
-
 abstract class UploadValidator
 {
-    const ERROR_UPLOAD_FAILURE     = 1;
-    const ERROR_FILE_TOO_SMALL     = 2;
-    const ERROR_FILE_TOO_BIG       = 5;
+    const ERROR_UPLOAD_FAILURE = 1;
+    const ERROR_FILE_TOO_SMALL = 2;
+    const ERROR_FILE_TOO_BIG   = 5;
 
     public static function isUploadedFile(array $entry = null)
     {

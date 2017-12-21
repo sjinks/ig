@@ -2,9 +2,6 @@
 
 namespace WildWolf;
 
-use WildWolf\ImageUploaderException;
-use WildWolf\UploadValidator;
-
 class ImageUploader
 {
     const ERROR_UPLOAD_FAILURE     = UploadValidator::ERROR_UPLOAD_FAILURE;
@@ -43,8 +40,15 @@ class ImageUploader
      */
     private $check_uniquness = true;
 
+    private $entry = null;
+
     public function __construct()
     {
+    }
+
+    public function setFile($entry)
+    {
+        $this->entry = $entry;
     }
 
     public function maxUploadSize() : int
@@ -106,26 +110,25 @@ class ImageUploader
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $type  = (string)$finfo->file($file, FILEINFO_MIME_TYPE);
         if ('image/' !== substr($type, 0, strlen('image/'))) {
-            throw new ImageUploaderException('', self::ERROR_NOT_IMAGE);
+            throw new ImageUploaderException('The file is not an image.', self::ERROR_NOT_IMAGE);
         }
 
         if (!in_array($type, $this->accepted_types)) {
-            throw new ImageUploaderException('', self::ERROR_FILE_NOT_SUPPORTED);
+            throw new ImageUploaderException('File format is not supported / accepted.', self::ERROR_FILE_NOT_SUPPORTED);
         }
 
         return $type;
     }
 
-    public function validateFile(array $entry = null) : array
+    public function validateFile()
     {
+        $entry = $this->entry;
+
         UploadValidator::isUploadedFile($entry);
         UploadValidator::isValidSize($entry, 0, $this->max_upload_size);
 
         $fname = $entry['tmp_name'];
-        $type  = $this->validateImageType($fname);
-        $res   = ImageReader::getReader($fname, $type);
-        $res->load();
-        return [$res, $type];
+        $this->validateImageType($fname);
     }
 
     private function getTargetDirectory(string $name) : string
@@ -187,11 +190,8 @@ class ImageUploader
         return [$f, $fullname];
     }
 
-    public function saveAsJpeg(ImageReaderInterface $r, string $name) : string
+    public function save(string $name) : string
     {
-        $writer = $r->getWriter();
-        $writer->setOutputFormat('JPEG');
-
         $name = basename($name);
         $dir  = $this->getTargetDirectory($name);
 
@@ -199,10 +199,18 @@ class ImageUploader
         $res  = $this->createTargetFile($dir, $name);
 
         try {
-            $writer->save($res[0]);
+            $f1 = $res[0];
+            $f0 = fopen($this->entry['tmp_name'], 'rb');
+
+            if (!is_resource($f0) || !stream_copy_to_stream($f0, $f1)) {
+                throw new ImageUploaderException("File copy failed.", self::ERROR_UPLOAD_FAILURE);
+            }
         }
-        catch (ImageUploaderException $e) {
-            throw new ImageUploaderException($e->getMessage(), self::ERROR_UPLOAD_FAILURE);
+        finally {
+            fclose($f1);
+            if (is_resource($f0)) {
+                fclose($f0);
+            }
         }
 
         return $res[1];

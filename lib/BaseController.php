@@ -1,10 +1,11 @@
 <?php
 
-namespace WildWolf\Handler;
+namespace WildWolf;
 
-use Slim\Slim;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 
-abstract class BaseHandler
+abstract class BaseController
 {
     const ERROR_UPLOAD_FAILURE     = 1;
     const ERROR_FILE_EMPTY         = 2;
@@ -19,29 +20,14 @@ abstract class BaseHandler
     const ERROR_BAD_RESOLUTION     = 11;
 
     /**
-     * @var \WildWolf\Application
+     * @var ContainerInterface
      */
-    protected $app;
+    protected $container;
 
-    /**
-     * @var int
-     */
-    protected $code;
-
-    public function __construct(Slim $app)
+    public function __construct(ContainerInterface $container)
     {
-        $this->app = $app;
+        $this->container = $container;
     }
-
-    public function __invoke()
-    {
-        $this->code = (int)$this->app->request()->get('error', 0);
-
-        $args = func_get_args();
-        /** @scrutinizer ignore-call */$this->run(...$args);
-    }
-
-    abstract protected function run();
 
     protected static function getErrorByCode(int $code) : string
     {
@@ -62,19 +48,37 @@ abstract class BaseHandler
         return $errors[$code] ?? 'Невідома помилка';
     }
 
-    protected function maybeAppendErrorCode(string $url) : string
+    protected function failure(ResponseInterface $response, int $code, bool $idx = false) : ResponseInterface
     {
-        if ($this->code) {
-            $char = (false === strpos($url, '?')) ? '?' : '&';
-            return $url . $char . 'error=' . $this->code;
-        }
-
-        return $url;
+        error_log(print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 1));
+        $base = ($idx) ? '/?error=' : '/start?error=';
+        return $response
+            ->withStatus(302)
+            ->withHeader('Location', $base . $code)
+        ;
     }
 
-    protected function failure(int $code, bool $idx = false)
+    protected function jsonError(ResponseInterface $response) : ResponseInterface
     {
-        $base = ($idx) ? '/?error=' : '/start?error=';
-        $this->app->redirect($base . $code);
+        $body = $response->getBody();
+        $body->write('[]');
+
+        return $response
+            ->withStatus(500)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withBody($body)
+        ;
+    }
+
+    protected function jsonResponse(ResponseInterface $response, $data) : ResponseInterface
+    {
+        $body = $response->getBody();
+        $body->write(json_encode($data));
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withBody($body)
+        ;
     }
 }
