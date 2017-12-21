@@ -88,7 +88,7 @@ class SearchController extends BaseController
 
         try {
             $entry = $_FILES['photo']   ?? [];
-            $fname = $entry['tmp_name'] ?? null;
+            $fname = $entry['tmp_name'] ?? '';
 
             $this->uploader->setFile($entry);
             $this->uploader->validateFile();
@@ -97,6 +97,7 @@ class SearchController extends BaseController
             }
 
             $f = fopen($fname, 'rb');
+            assert(is_resource($f));
             $r = $this->fbr->uploadPhotoForSearch($f);
             fclose($f);
             if (!($r instanceof SearchUploadAck)) {
@@ -156,7 +157,7 @@ class SearchController extends BaseController
         return self::ERROR_GENERAL_FAILURE;
     }
 
-    public function result(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface
+    public function result(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface
     {
         $guid     = $args['guid'];
         $r        = $this->fbr->checkSearchStatus($guid);
@@ -215,7 +216,7 @@ class SearchController extends BaseController
         return $this->failure($response, self::ERROR_GENERAL_FAILURE);
     }
 
-    public function face(ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface
+    public function face(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response, array $args) : ResponseInterface
     {
         $guid = $args['guid'];
         $n    = $args['n'];
@@ -261,7 +262,7 @@ class SearchController extends BaseController
 
         if (preg_match('!([/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2}[/\\\\][0-9a-fA-F]{2,}[/\\\\])!', $path, $m)) {
             $id      = str_replace(['/', '\\'], '', $m[1]);
-            $json    = $this->psbInfo(hexdec($id));
+            $json    = $this->psbInfo((int)hexdec($id));
             $path    = $json[2] ?? '-';
             $link    = $json     ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : '#';
             $country = $json[4] ?? '';

@@ -30,13 +30,14 @@ $config    = require __DIR__ . '/../config/config.php';
 $app       = new App(['settings' => $config]);
 $container = $app->getContainer();
 $provider  = new ServiceProvider();
+assert($container instanceof ArrayAccess);
 $provider->register($container);
 
 $app
-    ->add(new Session($app))
+    ->add(new Session())
     ->add(new CountryRestrictor($app))
-    ->add(new IPResolver($app))
-    ->add(new CloudflareIPRewrite($app))
+    ->add(new IPResolver())
+    ->add(new CloudflareIPRewrite())
 ;
 
 $validate_user      = new ValidateUser();

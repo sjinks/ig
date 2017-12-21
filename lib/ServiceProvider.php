@@ -27,7 +27,7 @@ class ServiceProvider
     {
         $settings = $container['settings'];
 
-        if (!empty($config['memcached.servers'])) {
+        if (!empty($settings['memcached.servers'])) {
             $container['cache'] = function(ContainerInterface $c) {
                 $settings = $c->get('settings');
                 return new Memcached([
@@ -90,7 +90,7 @@ class ServiceProvider
             return $fbr;
         };
 
-        $container['uploader'] = function(ContainerInterface $c) {
+        $container['uploader'] = function(/** @scrutinizer ignore-unused */ ContainerInterface $c) {
             $uploader = new ImageUploader();
             $uploader->setMaxUploadSize(7340032);
             $uploader->setDirectoryDepth(3);
@@ -105,7 +105,7 @@ class ServiceProvider
             return new ReCaptcha($settings['recaptcha.secret']);
         };
 
-        $container['view'] = function(ContainerInterface $c) {
+        $container['view'] = function(/** @scrutinizer ignore-unused */ ContainerInterface $c) {
             return new PhpRenderer(__DIR__ . "/../templates/");
         };
     }

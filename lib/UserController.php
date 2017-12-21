@@ -64,7 +64,7 @@ class UserController extends BaseController
         $acckit = $this->container->get('acckit');
 
         $post   = (array)$request->getParsedBody();
-        $phone  = $post['p'] ?? null;
+        $phone  = $post['p'] ?? '';
         $body   = 0;
 
         try {
@@ -147,7 +147,7 @@ class UserController extends BaseController
         return 0;
     }
 
-    public function logOut(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function logOut(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
         if (!empty($_SESSION['user'])) {
             /**

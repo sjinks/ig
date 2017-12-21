@@ -60,25 +60,23 @@ abstract class BaseController
 
     protected function jsonError(ResponseInterface $response) : ResponseInterface
     {
-        $body = $response->getBody();
-        $body->write('[]');
-
-        return $response
-            ->withStatus(500)
-            ->withHeader('Content-Type', 'application/json; charset=utf-8')
-            ->withBody($body)
-        ;
+        return $this->sendJsonResponse($response, '[]', 500);
     }
 
     protected function jsonResponse(ResponseInterface $response, $data) : ResponseInterface
     {
-        $body = $response->getBody();
-        $body->write(json_encode($data));
+        return $this->sendJsonResponse($response, json_encode($data), 200);
+    }
+
+    private function sendJsonResponse(ResponseInterface $response, string $body, int $code)
+    {
+        $b = $response->getBody();
+        $b->write(json_encode($body));
 
         return $response
-            ->withStatus(200)
+            ->withStatus($code)
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
-            ->withBody($body)
+            ->withBody($b)
         ;
     }
 }

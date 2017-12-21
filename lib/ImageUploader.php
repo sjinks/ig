@@ -107,7 +107,7 @@ class ImageUploader
 
     private function validateImageType(string $file) : string
     {
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE, null);
         $type  = (string)$finfo->file($file, FILEINFO_MIME_TYPE);
         if ('image/' !== substr($type, 0, strlen('image/'))) {
             throw new ImageUploaderException('The file is not an image.', self::ERROR_NOT_IMAGE);
@@ -197,12 +197,12 @@ class ImageUploader
 
         $this->ensureDirectoryExists($dir);
         $res  = $this->createTargetFile($dir, $name);
+        $f1   = $res[0];
 
         try {
-            $f1 = $res[0];
             $f0 = fopen($this->entry['tmp_name'], 'rb');
 
-            if (!is_resource($f0) || !stream_copy_to_stream($f0, $f1)) {
+            if (!stream_copy_to_stream($f0, $f1)) {
                 throw new ImageUploaderException("File copy failed.", self::ERROR_UPLOAD_FAILURE);
             }
         }

@@ -66,7 +66,7 @@ abstract class Utils
 
                 if ($mp > $maxmp && $maxmp > 0) {
                     $factor = 1/sqrt($mp / $maxmp);
-                    $res    = $im->resizeimage((int)($w * $factor), 0, \Imagick::FILTER_TRIANGLE);
+                    $res    = $im->resizeimage((int)($w * $factor), 0, \Imagick::FILTER_TRIANGLE, 1);
                     if (false === $res) {
                         return false;
                     }

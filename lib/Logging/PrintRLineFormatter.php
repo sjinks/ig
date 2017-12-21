@@ -6,11 +6,9 @@ use Monolog\Formatter\LineFormatter;
 
 class PrintRLineFormatter extends LineFormatter
 {
-    public function __construct()
+    public function __construct($format = null, $dateFormat = null, $allowInlineLineBreaks = false, $ignoreEmptyContextAndExtra = false)
     {
-        $args = func_get_args();
-        parent::__construct(...$args);
-        $this->allowInlineLineBreaks(true);
+        parent::__construct($formar, $dateFormat, true, $ignoreEmptyContextAndExtra);
         $this->includeStacktraces(true);
     }
 

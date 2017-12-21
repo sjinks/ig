@@ -41,7 +41,7 @@ class CompareController extends BaseController
         $this->acckit   = $container->get('acckit');
     }
 
-    public function upload(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function upload(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
         $code = 0;
 
@@ -58,7 +58,7 @@ class CompareController extends BaseController
 
             foreach ($entries as $x) {
                 $this->uploader->setFile($x);
-                $this->uploader->validateFile($x);
+                $this->uploader->validateFile();
 
 //                 $mp = $resource->megapixels();
 //                 if ($mp > 5 || $mp < 0.08) {
@@ -74,14 +74,15 @@ class CompareController extends BaseController
             }
 
             $guid = $r->serverRequestId();
-            for ($i=1; $i<count($resources); ++$i) {
+            $cnt  = count($resources);
+            for ($i=1; $i<$cnt; ++$i) {
                 $r = $this->fbr->uploadRefPhoto($guid, $resources[$i], $i, count($resources) - 1, $i);
                 if (!($r instanceof UploadCompareAck)) {
                     throw new \Exception('', self::ERROR_GENERAL_FAILURE);
                 }
             }
 
-            for ($i=0; $i<count($resources); ++$i) {
+            for ($i=0; $i<$cnt; ++$i) {
                 $file = $guid . '-' . $i . '.jpg';
                 $this->uploader->setFile($entries[$i]);
                 $this->uploader->save($file);
@@ -107,7 +108,7 @@ class CompareController extends BaseController
         ;
     }
 
-    public function result(ServerRequestInterface $request, ResponseInterface $response, array $params) : ResponseInterface
+    public function result(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response, array $params) : ResponseInterface
     {
         $guid = $params['guid'];
         $r    = $this->fbr->getComparisonResults($guid);
@@ -122,7 +123,7 @@ class CompareController extends BaseController
             }
         }
 
-        return $this->failure(self::ERROR_GENERAL_FAILURE);
+        return $this->failure($response, self::ERROR_GENERAL_FAILURE);
     }
 
     private function wait(ResponseInterface $response) : ResponseInterface
