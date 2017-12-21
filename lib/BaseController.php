@@ -71,7 +71,7 @@ abstract class BaseController
     private function sendJsonResponse(ResponseInterface $response, string $body, int $code)
     {
         $b = $response->getBody();
-        $b->write(json_encode($body));
+        $b->write($body);
 
         return $response
             ->withStatus($code)
