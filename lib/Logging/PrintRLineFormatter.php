@@ -8,7 +8,7 @@ class PrintRLineFormatter extends LineFormatter
 {
     public function __construct($format = null, $dateFormat = null, $allowInlineLineBreaks = false, $ignoreEmptyContextAndExtra = false)
     {
-        parent::__construct($formar, $dateFormat, true, $ignoreEmptyContextAndExtra);
+        parent::__construct($format, $dateFormat, true, $ignoreEmptyContextAndExtra);
         $this->includeStacktraces(true);
     }
 
