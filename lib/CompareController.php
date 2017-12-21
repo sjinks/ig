@@ -43,8 +43,6 @@ class CompareController extends BaseController
 
     public function upload(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
-        $code = 0;
-
         $entry = $_FILES['photo1'] ?? [];
         $refs  = empty($_FILES['photo2']) ? null : Utils::normalizeFileEntry($_FILES['photo2']);
 
@@ -54,54 +52,71 @@ class CompareController extends BaseController
 
         try {
             $entries   = array_merge([$entry], $refs);
-            $resources = [];
-
-            foreach ($entries as $x) {
-                $this->uploader->setFile($x);
-                $this->uploader->validateFile();
-
-                /// TODO: check if the photo is 0.08..5 Mpix
-                $resources[] = fopen($x['tmp_name'], 'rb');
-            }
-
-            $r = $this->fbr->startCompare($resources[0], count($resources) - 1);
-            if (!($r instanceof StartCompareAck)) {
-                throw new \Exception('', self::ERROR_GENERAL_FAILURE);
-            }
-
-            $guid = $r->serverRequestId();
-            $cnt  = count($resources);
-            for ($i=1; $i<$cnt; ++$i) {
-                $r = $this->fbr->uploadRefPhoto($guid, $resources[$i], $i, $cnt - 1, (string)$i);
-                if (!($r instanceof UploadCompareAck)) {
-                    throw new \Exception('', self::ERROR_GENERAL_FAILURE);
-                }
-            }
-
-            for ($i=0; $i<$cnt; ++$i) {
-                $file = $guid . '-' . $i . '.jpg';
-                $this->uploader->setFile($entries[$i]);
-                $this->uploader->save($file);
-            }
+            $resources = $this->validateUploadedFiles($entries);
+            $guid      = $this->uploadToFBR($resources);
+            $this->saveFiles($entries, $guid);
         }
         catch (\Throwable $e) {
-            $code = $e->getCode();
+            return $this->failure($response, $e->getCode());
         }
         finally {
-            unlink($entry['tmp_name']);
-            foreach ($refs as $x) {
-                unlink($x['tmp_name']);
-            }
-        }
-
-        if ($code) {
-            return $this->failure($response, $code);
+            $this->deleteTemporaryFiles($entries);
         }
 
         return $response
             ->withStatus(302)
             ->withHeader('Location', '/cresult/' . $guid)
         ;
+    }
+
+    private function validateUploadedFiles(array $entries) : array
+    {
+        $resources = [];
+        foreach ($entries as $x) {
+            $this->uploader->setFile($x);
+            $this->uploader->validateFile();
+
+            /// TODO: check if the photo is 0.08..5 Mpix
+            $resources[] = fopen($x['tmp_name'], 'rb');
+        }
+
+        return $resources;
+    }
+
+    private function saveFiles(array $entries, string $base)
+    {
+        $cnt = count($entries);
+        for ($i=0; $i<$cnt; ++$i) {
+            $file = $base . '-' . $i . '.jpg';
+            $this->uploader->setFile($entries[$i]);
+            $this->uploader->save($file);
+        }
+    }
+
+    private function uploadToFBR(array $resources) : string
+    {
+        $r = $this->fbr->startCompare($resources[0], count($resources) - 1);
+        if (!($r instanceof StartCompareAck)) {
+            throw new \Exception('', self::ERROR_GENERAL_FAILURE);
+        }
+
+        $guid = $r->serverRequestId();
+        $cnt  = count($resources);
+        for ($i=1; $i<$cnt; ++$i) {
+            $r = $this->fbr->uploadRefPhoto($guid, $resources[$i], $i, $cnt - 1, (string)$i);
+            if (!($r instanceof UploadCompareAck)) {
+                throw new \Exception('', self::ERROR_GENERAL_FAILURE);
+            }
+        }
+
+        return $guid;
+    }
+
+    private function deleteTemporaryFiles(array $entries)
+    {
+        foreach ($entries as $x) {
+            unlink($x['tmp_name']);
+        }
     }
 
     public function result(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response, array $params) : ResponseInterface
