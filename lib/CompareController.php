@@ -66,7 +66,7 @@ class CompareController extends BaseController
 
     /**
      * @param \Psr\Http\Message\UploadedFileInterface[] $entries
-     * @return array
+     * @return resource[]
      */
     private function validateUploadedFiles(array $entries) : array
     {
@@ -76,7 +76,12 @@ class CompareController extends BaseController
             $this->uploader->validateFile();
 
             /// TODO: check if the photo is 0.08..5 Mpix
-            $resources[] = fopen($x->getStream()->getMetadata('uri'), 'rb');
+
+            /** @var string $fname */
+            $fname       = $x->getStream()->getMetadata('uri');
+            /** @var resource $f */
+            $f           = fopen($fname, 'rb');
+            $resources[] = $f;
         }
 
         return $resources;
@@ -118,6 +123,9 @@ class CompareController extends BaseController
     {
         foreach ($entries as $x) {
             $stream = $x->getStream();
+            /**
+             * @var string $fname
+             */
             $fname  = $stream->getMetadata('uri');
             $stream->close();
             unlink($fname);

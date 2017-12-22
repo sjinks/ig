@@ -34,8 +34,9 @@ abstract class UploadValidator
 
     public static function isValidType(UploadedFileInterface $entry, array $accepted)
     {
+        $fname = (string)$entry->getStream()->getMetadata('uri');
         $finfo = new \finfo(FILEINFO_MIME_TYPE, null);
-        $type  = (string)$finfo->file($entry->getStream()->getMetadata('uri'), FILEINFO_MIME_TYPE);
+        $type  = (string)$finfo->file($fname, FILEINFO_MIME_TYPE);
         if ('image/' !== substr($type, 0, strlen('image/'))) {
             throw new ImageUploaderException('The file is not an image.', self::ERROR_NOT_IMAGE);
         }

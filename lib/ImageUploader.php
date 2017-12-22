@@ -110,6 +110,8 @@ class ImageUploader
         $entry = $this->entry;
 
         UploadValidator::isUploadedFile($entry);
+        // At this point, $entry cannot be null
+        /** @var UploadedFileInterface $entry */
         UploadValidator::isValidSize($entry, 0, $this->max_upload_size);
         UploadValidator::isValidType($entry, $this->accepted_types);
     }
@@ -178,6 +180,10 @@ class ImageUploader
         $dest = $this->createTargetFile($dir, $name);
 
         try {
+            if (!$this->entry) {
+                throw new \RuntimeException();
+            }
+
             $this->entry->moveTo($dest);
         }
         catch (\RuntimeException $e) {

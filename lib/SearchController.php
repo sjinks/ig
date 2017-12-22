@@ -91,14 +91,17 @@ class SearchController extends BaseController
             $this->uploader->validateFile();
 
             /** @var \Psr\Http\Message\UploadedFileInterface $entry */
-            $fname = $entry->getStream()->getMetadata('uri');
+            /** @var string $fname */
+            /// Scrutinizer does not understand that $entry is not null here :-(
+            $fname = $entry->/** @scrutinizer ignore-call */getStream()->getMetadata('uri');
             if (!Utils::maybePreprocessImage($fname, 4)) {
                 return $this->failure($response, self::ERROR_UPLOAD_FAILURE);
             }
 
+            /** @var resource $f */
             $f = fopen($fname, 'rb'); // Will throw an exception on failure because of `set_error_handler()`
-            $r = $this->fbr->uploadPhotoForSearch(/** @scrutinizer ignore-type */ $f);
-            fclose(/** @scrutinizer ignore-type */ $f);
+            $r = $this->fbr->uploadPhotoForSearch($f);
+            fclose($f);
             if (!($r instanceof SearchUploadAck)) {
                 return $this->failure($response, self::ERROR_GENERAL_FAILURE);
             }
@@ -112,11 +115,14 @@ class SearchController extends BaseController
             }
         }
         catch (ImageUploaderException $e) {
-            $stream = $entry->getStream();
-            $name   = $stream->getMetadata('uri');
-            $stream->close();
-            unlink($name);
-            return $this->failure($response, $e->getCode);
+            if ($entry) {
+                $stream = $entry->getStream();
+                $name   = $stream->getMetadata('uri');
+                $stream->close();
+                unlink($name);
+            }
+
+            return $this->failure($response, $e->getCode());
         }
 
         return $response
