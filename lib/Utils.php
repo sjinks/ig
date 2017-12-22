@@ -43,7 +43,7 @@ abstract class Utils
             $sf = $im->getimageproperty('jpeg:sampling-factor');
             $q  = $im->getimagecompressionquality();
             $f  = strtolower($im->getimageformat());
-            $il = $im->getinterlacescheme();
+            $il = $im->getimageinterlacescheme();
 
             $mp = $w * $h / 1000000.0;
 
@@ -52,7 +52,7 @@ abstract class Utils
                 || ($f !== 'jpeg')                  // Not a JPEG
                 || empty($sf)                       // Unknown sampling factor
                 || (substr($sf, 0, 2) === '1x')     // Sampling factor is 4:4:x
-                || ($il !== \Imagick::INTERLACE_NO) // FBR does not accept interlacing
+                || ($il != \Imagick::INTERLACE_NO)  // FBR does not accept interlacing
             ;
 
             if ($flag) {
@@ -62,7 +62,7 @@ abstract class Utils
                 }
 
                 $im->setimageproperty('jpeg:sampling-factor', '4:2:0');
-                $im->setinterlacescheme(\Imagick::INTERLACE_NO);
+                $im->setimageinterlacescheme(\Imagick::INTERLACE_NO);
 
                 if ($mp > $maxmp && $maxmp > 0) {
                     $factor = 1/sqrt($mp / $maxmp);
