@@ -12,7 +12,7 @@ class ValidateUser
         if (empty($_SESSION['user'])) {
             return $response
                 ->withStatus(302)
-                ->withHeader('Locaiton', '/')
+                ->withHeader('Location', '/')
             ;
         }
 
