@@ -41,14 +41,11 @@ class CompareController extends BaseController
         $this->acckit   = $container->get('acckit');
     }
 
-    public function upload(/** @scrutinizer ignore-unused */ ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function upload(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
-        $entry = $_FILES['photo1'] ?? [];
-        $refs  = empty($_FILES['photo2']) ? null : Utils::normalizeFileEntry($_FILES['photo2']);
-
-        if (!$entry || !$refs) {
-            return $this->failure($response, self::ERROR_GENERAL_FAILURE);
-        }
+        $files = $request->getUploadedFiles();
+        $entry = $files['photo1'] ?? null;
+        $refs  = $files['photo2'] ?? [null];
 
         try {
             $entries   = array_merge([$entry], $refs);
@@ -57,10 +54,8 @@ class CompareController extends BaseController
             $this->saveFiles($entries, $guid);
         }
         catch (\Throwable $e) {
-            return $this->failure($response, $e->getCode());
-        }
-        finally {
             $this->deleteTemporaryFiles($entries);
+            return $this->failure($response, $e->getCode());
         }
 
         return $response
@@ -69,6 +64,10 @@ class CompareController extends BaseController
         ;
     }
 
+    /**
+     * @param \Psr\Http\Message\UploadedFileInterface[] $entries
+     * @return array
+     */
     private function validateUploadedFiles(array $entries) : array
     {
         $resources = [];
@@ -77,7 +76,7 @@ class CompareController extends BaseController
             $this->uploader->validateFile();
 
             /// TODO: check if the photo is 0.08..5 Mpix
-            $resources[] = fopen($x['tmp_name'], 'rb');
+            $resources[] = fopen($x->getStream()->getMetadata('uri'), 'rb');
         }
 
         return $resources;
@@ -112,10 +111,16 @@ class CompareController extends BaseController
         return $guid;
     }
 
+    /**
+     * @param \Psr\Http\Message\UploadedFileInterface[] $entries
+     */
     private function deleteTemporaryFiles(array $entries)
     {
         foreach ($entries as $x) {
-            unlink($x['tmp_name']);
+            $stream = $x->getStream();
+            $fname  = $stream->getMetadata('uri');
+            $stream->close();
+            unlink($fname);
         }
     }
 
@@ -172,11 +177,11 @@ class CompareController extends BaseController
             $sims[]  = 0;
         }
 
-        if ($r->resultCode() == 3) {
+        if ($r->succeeded()) {
             /**
              * @var $x \WildWolf\FBR\Response\Parts\CompareResult
              */
-            foreach ($response as $x) {
+            foreach ($r as $x) {
                 $idx = (int)$x->name();
                 $sim = $x->similarity();
 

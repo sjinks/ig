@@ -20,7 +20,6 @@ function exception_error_handler($severity, $message, $file, $line)
         return;
     }
 
-    error_log("$message $file $line");
     throw new \ErrorException($message, 0, $severity, $file, $line);
 }
 

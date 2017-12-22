@@ -84,19 +84,19 @@ class SearchController extends BaseController
 
     public function upload(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
-        $code = 0;
-
+        $files = $request->getUploadedFiles();
+        $entry = $files['photo'] ?? null;
         try {
-            $entry = $_FILES['photo']   ?? [];
-            $fname = $entry['tmp_name'] ?? '';
-
             $this->uploader->setFile($entry);
             $this->uploader->validateFile();
+
+            /** @var \Psr\Http\Message\UploadedFileInterface $entry */
+            $fname = $entry->getStream()->getMetadata('uri');
             if (!Utils::maybePreprocessImage($fname, 4)) {
                 return $this->failure($response, self::ERROR_UPLOAD_FAILURE);
             }
 
-            $f = fopen($fname, 'rb');
+            $f = fopen($fname, 'rb'); // Will throw an exception on failure because of `set_error_handler()`
             $r = $this->fbr->uploadPhotoForSearch(/** @scrutinizer ignore-type */ $f);
             fclose(/** @scrutinizer ignore-type */ $f);
             if (!($r instanceof SearchUploadAck)) {
@@ -112,14 +112,11 @@ class SearchController extends BaseController
             }
         }
         catch (ImageUploaderException $e) {
-            $code = $e->getCode();
-        }
-        finally {
-            unlink($_FILES['photo']['tmp_name']);
-        }
-
-        if ($code) {
-            return $this->failure($response, $code);
+            $stream = $entry->getStream();
+            $name   = $stream->getMetadata('uri');
+            $stream->close();
+            unlink($name);
+            return $this->failure($response, $e->getCode);
         }
 
         return $response

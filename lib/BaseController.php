@@ -50,7 +50,6 @@ abstract class BaseController
 
     protected function failure(ResponseInterface $response, int $code, bool $idx = false) : ResponseInterface
     {
-        error_log(print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 1));
         $base = ($idx) ? '/?error=' : '/start?error=';
         return $response
             ->withStatus(302)

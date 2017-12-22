@@ -2,14 +2,15 @@
 
 namespace WildWolf;
 
+use Psr\Http\Message\UploadedFileInterface;
+
 class ImageUploader
 {
     const ERROR_UPLOAD_FAILURE     = UploadValidator::ERROR_UPLOAD_FAILURE;
     const ERROR_FILE_TOO_SMALL     = UploadValidator::ERROR_FILE_TOO_SMALL;
-    const ERROR_NOT_IMAGE          = 3;
-    const ERROR_FILE_NOT_SUPPORTED = 4;
+    const ERROR_NOT_IMAGE          = UploadValidator::ERROR_NOT_IMAGE;
+    const ERROR_FILE_NOT_SUPPORTED = UploadValidator::ERROR_FILE_NOT_SUPPORTED;
     const ERROR_FILE_TOO_BIG       = UploadValidator::ERROR_FILE_TOO_BIG;
-    const ERROR_GENERAL_FAILURE    = 6;
 
     /**
      * @var integer
@@ -40,13 +41,12 @@ class ImageUploader
      */
     private $check_uniquness = true;
 
+    /**
+     * @var UploadedFileInterface|null
+     */
     private $entry = null;
 
-    public function __construct()
-    {
-    }
-
-    public function setFile($entry)
+    public function setFile(UploadedFileInterface $entry = null)
     {
         $this->entry = $entry;
     }
@@ -105,30 +105,13 @@ class ImageUploader
         $this->check_uniquness = $v;
     }
 
-    private function validateImageType(string $file) : string
-    {
-        $finfo = new \finfo(FILEINFO_MIME_TYPE, null);
-        $type  = (string)$finfo->file($file, FILEINFO_MIME_TYPE);
-        if ('image/' !== substr($type, 0, strlen('image/'))) {
-            throw new ImageUploaderException('The file is not an image.', self::ERROR_NOT_IMAGE);
-        }
-
-        if (!in_array($type, $this->accepted_types)) {
-            throw new ImageUploaderException('File format is not supported / accepted.', self::ERROR_FILE_NOT_SUPPORTED);
-        }
-
-        return $type;
-    }
-
     public function validateFile()
     {
         $entry = $this->entry;
 
         UploadValidator::isUploadedFile($entry);
         UploadValidator::isValidSize($entry, 0, $this->max_upload_size);
-
-        $fname = $entry['tmp_name'];
-        $this->validateImageType($fname);
+        UploadValidator::isValidType($entry, $this->accepted_types);
     }
 
     private function getTargetDirectory(string $name) : string
@@ -158,36 +141,32 @@ class ImageUploader
         }
     }
 
-    private function createFileForcefully(string $fullname) : array
-    {
-        $f = Utils::safe_fopen($fullname, 'wb');
-        if (!is_resource($f)) {
-            throw new ImageUploaderException("Failed to create the target file - " . $fullname, self::ERROR_UPLOAD_FAILURE);
-        }
-
-        return [$f, $fullname];
-    }
-
-    private function createTargetFile(string $dir, string $file)
+    /**
+     * @param string $dir
+     * @param string $file
+     * @return string
+     */
+    private function createTargetFile(string $dir, string $file) : string
     {
         $fullname = $dir . DIRECTORY_SEPARATOR . $file;
-        if (!$this->check_uniquness) {
-            return $this->createFileForcefully($fullname);
+
+        if ($this->check_uniquness) {
+            list($name, $ext) = Utils::splitFilename($file);
+
+            $suffix = 0;
+
+            $f = Utils::safe_fopen($fullname, 'xb');
+            while (false === $f) {
+                ++$suffix;
+
+                $fullname = $dir . DIRECTORY_SEPARATOR . $name . '-' . $suffix . $ext;
+                $f        = Utils::safe_fopen($fullname, 'xb');
+            }
+
+            fclose($f);
         }
 
-        list($name, $ext) = Utils::splitFilename($file);
-
-        $suffix = 0;
-
-        $f = Utils::safe_fopen($fullname, 'xb');
-        while (false === $f) {
-            ++$suffix;
-
-            $fullname = $dir . DIRECTORY_SEPARATOR . $name . '-' . $suffix . $ext;
-            $f        = Utils::safe_fopen($fullname, 'xb');
-        }
-
-        return [$f, $fullname];
+        return $fullname;
     }
 
     public function save(string $name) : string
@@ -196,24 +175,16 @@ class ImageUploader
         $dir  = $this->getTargetDirectory($name);
 
         $this->ensureDirectoryExists($dir);
-        $res  = $this->createTargetFile($dir, $name);
-        $f1   = $res[0];
+        $dest = $this->createTargetFile($dir, $name);
 
         try {
-            $f0 = fopen($this->entry['tmp_name'], 'rb');
-
-            if (!stream_copy_to_stream(/** @scrutinizer ignore-type */ $f0, $f1)) {
-                throw new ImageUploaderException("File copy failed.", self::ERROR_UPLOAD_FAILURE);
-            }
+            $this->entry->moveTo($dest);
         }
-        finally {
-            fclose($f1);
-            if (is_resource($f0)) {
-                fclose($f0);
-            }
+        catch (\RuntimeException $e) {
+            throw new ImageUploaderException($e->getMessage(), self::ERROR_UPLOAD_FAILURE);
         }
 
-        return $res[1];
+        return $dest;
     }
 
     public function getTargetName(string $name, bool $relative = true) : string

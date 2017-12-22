@@ -81,19 +81,4 @@ abstract class Utils
             return false;
         }
     }
-
-    public static function normalizeFileEntry(array $entry)
-    {
-        $res   = [];
-        $count = count($entry['name']);
-        $keys  = array_keys($entry);
-
-        for ($i=0; $i<$count; ++$i) {
-            foreach ($keys as $key) {
-                $res[$i][$key] = $entry[$key][$i];
-            }
-        }
-
-        return $res;
-    }
 }
