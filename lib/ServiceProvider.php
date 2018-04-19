@@ -106,7 +106,9 @@ class ServiceProvider
         };
 
         $container['view'] = function(/** @scrutinizer ignore-unused */ ContainerInterface $c) {
-            return new PhpRenderer(__DIR__ . "/../templates/");
+            $renderer = new PhpRenderer(__DIR__ . "/../templates/");
+            $renderer->addAttribute('script_nonce', base64_encode(openssl_random_pseudo_bytes(16)));
+            return $renderer;
         };
     }
 
