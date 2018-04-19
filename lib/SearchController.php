@@ -205,10 +205,10 @@ class SearchController extends BaseController
                 'url'        => '/uploads/' . $this->uploader->getTargetName($guid . '.jpg'),
                 'iframe'     => $iframe,
                 'title'      => 'Результати розпізнавання',
-                'header_css' => ['https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.css'],
+                'header_css' => ['https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css'],
                 'footer_js'  => [
-                    'https://cdnjs.cloudflare.com/ajax/libs/jsrender/0.9.86/jsrender.min.js',
-                    'https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/jsrender/0.9.90/jsrender.min.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js',
                     '/js/results.min.js',
                 ],
             ];
