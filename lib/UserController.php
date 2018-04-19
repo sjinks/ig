@@ -47,7 +47,7 @@ class UserController extends BaseController
                 'error'     => $error,
                 'app_id'    => $this->container->get('settings')['fb.app_id'],
                 'header_js' => ['https://sdk.accountkit.com/uk_UA/sdk.js'],
-                'footer_js' => ['/js/index.js']
+                'footer_js' => ['/js/index.min.js?v=1']
             ]
         );
     }

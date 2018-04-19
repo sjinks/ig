@@ -158,7 +158,7 @@ class CompareController extends BaseController
             [
                 'title'     => 'Зачекайте, будь ласка',
                 'timeout'   => 5000,
-                'footer_js' => ['/js/wait.js?v=3'],
+                'footer_js' => ['/js/wait.min.js?v=3'],
             ]
         );
     }

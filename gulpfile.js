@@ -2,10 +2,9 @@
 
 var gulp         = require('gulp');
 var del          = require('del');
-var autoprefixer = require('gulp-autoprefixer');
 var rename       = require('gulp-rename');
 var sourcemaps   = require('gulp-sourcemaps');
-var cleancss     = require('gulp-clean-css');
+var postcss      = require('gulp-postcss');
 var sass         = require('gulp-sass');
 var uglify       = require('gulp-uglify');
 var exec         = require('gulp-exec');
@@ -62,20 +61,21 @@ gulp.task('css', function() {
 	return gulp.src(src)
 		.pipe(prune({
 			dest: dest,
-			ext: ['.css.map', '.css']
+			ext: ['.min.css.map', '.min.css']
 		}))
 		.pipe(newer({
 			dest: dest,
-			ext: '.css'
+			ext: '.min.css'
 		}))
 		.pipe(sourcemaps.init())
-		.pipe(sass({
-			errLogToConsole: true,
-			outputStyle: 'expanded',
-			precision: 5
-		}))
-		.pipe(autoprefixer({browsers: '> 5%'}))
-		.pipe(cleancss())
+		.pipe(sass({ errLogToConsole: true, outputStyle: 'expanded', precision: 5 }))
+		.pipe(
+			postcss([
+				require('autoprefixer')({browsers: '> 5%'}),
+				require('cssnano')()
+			])
+		)
+		.pipe(rename({suffix: '.min'}))
 		.pipe(sourcemaps.write('.'))
 		.pipe(gulp.dest(dest))
 	;
@@ -87,11 +87,12 @@ gulp.task('js', function() {
 	return gulp.src(src)
 		.pipe(prune({
 			dest: dest,
-			ext: ['.js.map', '.js']
+			ext: ['.min.js.map', '.min.js']
 		}))
-		.pipe(newer(dest))
+		.pipe(newer({ dest: dest, ext: '.min.js' }))
 		.pipe(sourcemaps.init())
 		.pipe(uglify())
+		.pipe(rename({suffix: '.min'}))
 		.pipe(sourcemaps.write('.'))
 		.pipe(gulp.dest('public/js'))
 	;

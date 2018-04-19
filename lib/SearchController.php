@@ -2,6 +2,7 @@
 
 namespace WildWolf;
 
+use function Monolog\Handler\error_log;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -75,7 +76,7 @@ class SearchController extends BaseController
                 'title'          => 'Завантажити світлину',
                 'recaptcha'      => $this->settings['recaptcha.public'],
                 'footer_js'      => [
-                    '/js/upload.js?v=9',
+                    '/js/upload.min.js?v=9',
                     'https://www.google.com/recaptcha/api.js?onload=reCaptchaCallback&render=explicit',
                 ],
             ]
@@ -171,7 +172,7 @@ class SearchController extends BaseController
                 [
                     'title'     => 'Зачекайте, будь ласка',
                     'timeout'   => 10000,
-                    'footer_js' => ['/js/wait.js?v=3'],
+                    'footer_js' => ['/js/wait.min.js?v=3'],
                 ]
             );
         }
@@ -208,7 +209,7 @@ class SearchController extends BaseController
                 'footer_js'  => [
                     'https://cdnjs.cloudflare.com/ajax/libs/jsrender/0.9.86/jsrender.min.js',
                     'https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.js',
-                    '/js/results.js',
+                    '/js/results.min.js',
                 ],
             ];
 
@@ -232,7 +233,7 @@ class SearchController extends BaseController
 
             $data = [];
             foreach ($r as $x) {
-                $info   = $this->getAdditionalInformation($x->path());
+                $info   = $this->getAdditionalInformation($x->path(), $x->namel());
                 $entry  = [$x->similarity(), $info[0], $x->face(), $info[1], $info[2], $info[3], $info[4]];
                 $data[] = $entry;
             }
@@ -244,16 +245,51 @@ class SearchController extends BaseController
         }
     }
 
-    private function getAdditionalInformation($path) : array
+    private function getAdditionalInformation(string $path, string $namel) : array
     {
-        if (preg_match('!(?:^|[\\\\/])criminals!i', $path)) {
-            return $this->processCriminal($path);
+        if (!empty($path) && preg_match('!(?:^|[\\\\/])criminals!i', $path)) {
+            return $this->processCriminalOldFormat($path);
+        }
+
+        $m = [];
+        if (!empty($namel) && preg_match('/^{!1-0-([0-9]++)-([0-9]++)}#/', $namel, $m)) {
+            return $this->processCriminalFormat1((int)$m[1], (int)$m[2]);
         }
 
         return ['-', '#', '', '', ''];
     }
 
-    private function processCriminal(string $path) : array
+    private function processCriminalFormat1(int $cid, int $pid) : array
+    {
+        $json    = $this->psbInfo($cid);
+        $path    = $json[2] ?? '-';
+        $link    = $json     ? ('https://myrotvorets.center/criminal/' . $json[1] . '/') : '#';
+        $country = $json[4] ?? '';
+        list($pphoto, $mphoto) = $this->findPhotos1($json[9] ?? [], $pid);
+
+        return [$path, $link, $country, $mphoto, $pphoto];
+    }
+
+    private function findPhotos1(array $photos, int $pid) : array
+    {
+        $mphoto  = '';
+        $pphoto  = '';
+
+        foreach ($photos as $y) {
+            if (empty($pphoto) && 'image/' === substr($y[1], 0, strlen('image/'))) {
+                $pphoto = 'https://psb4ukr.natocdn.work/' . $y[0];
+            }
+
+            if ($pid == $y[2]) {
+                $mphoto = 'https://psb4ukr.natocdn.work/' . $y[0];
+                break;
+            }
+        }
+
+        return [$pphoto, $mphoto];
+    }
+
+    private function processCriminalOldFormat(string $path) : array
     {
         $orig    = $path;
         $link    = '#';
@@ -272,14 +308,14 @@ class SearchController extends BaseController
             $prefix = 'criminals' . strtolower(str_replace('\\', '/', $m[1]));
             if ($json && preg_match('/{([^}]++)}/', $orig, $m)) {
                 $prefix .= $m[1] . '.';
-                list($pphoto, $mphoto) = $this->findPhotos($json[9] ?? [], $prefix);
+                list($pphoto, $mphoto) = $this->findPhotosOld($json[9] ?? [], $prefix);
             }
         }
 
         return [$path, $link, $country, $mphoto, $pphoto];
     }
 
-    private function findPhotos(array $photos, string $prefix) : array
+    private function findPhotosOld(array $photos, string $prefix) : array
     {
         $mphoto  = '';
         $pphoto  = '';
@@ -305,10 +341,15 @@ class SearchController extends BaseController
         $res   = $cache ? $cache->get($key, null) : null;
 
         if (!is_array($res)) {
-            $res = json_decode(file_get_contents('https://srv1.psbapi.work/c/D/' . $id));
+            try {
+                $res = json_decode(file_get_contents('https://srv1.psbapi.work/c/D/' . $id));
 
-            if ($cache) {
-                $cache->set($key, $res, 3600);
+                if ($cache) {
+                    $cache->set($key, $res, 3600);
+                }
+            }
+            catch (\Throwable $e) {
+                error_log($e);
             }
         }
 
