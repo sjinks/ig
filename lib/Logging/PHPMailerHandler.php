@@ -23,7 +23,7 @@ class PHPMailerHandler extends MailHandler
     protected function send($content, array $records)
     {
         $this->mailer->Body = $content;
-        error_log($content);
+        \error_log($content);
         $this->mailer->send();
     }
 }
